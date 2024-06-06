@@ -3,15 +3,14 @@
 #include <cstdlib>
 #include <filesystem>
 #include <../include/sqlite3.h>
+#include <map>
 
-std::string gamePath;
+std::map<std::string, std::string> games;
 
 std::string database_initialization_command = "CREATE TABLE GAME("
                                                 "GAME_ID INT PRIMARY KEY NOT NULL, "
                                                 "GAME_NAME TEXT NOT NULL, "
                                                 "GAME_PATH TEXT NOT NULL);";
-
-std::string insert_example_game_command = "INSERT INTO GAME (GAME_ID, GAME_NAME, GAME_PATH) VALUES (1, 'Devastating Fog', \"\");";
 
 const char* select_all_games_command = "SELECT * FROM GAME;";
 
@@ -26,28 +25,37 @@ void printMessage(std::string message) {
 void execute_sql_command(sqlite3* database, std::string command) {
     int exit = 0;
     char* messageError;
-    exit = sqlite3_exec(database, database_initialization_command.c_str(), NULL, 0, &messageError);    
+    exit = sqlite3_exec(database, command.c_str(), NULL, 0, &messageError);    
     
     if (exit != SQLITE_OK) {
-        printMessage("Error with command: " + command);
+        printMessage("Error with command: " + command + " " + messageError);
         sqlite3_free(messageError);
     }
 }
 
+void addGame(sqlite3* database, std::string name, std::string path) {
+    static int val = 1;
+    std::string command = "INSERT INTO GAME (GAME_ID, GAME_NAME, GAME_PATH) VALUES (";
+    command += std::to_string(val) + ", '" + name + "', \"" + path + "\");";
+    val++;
+    execute_sql_command(database, command);
+}
+
 void initialize_database(sqlite3* database) {
-    execute_sql_command(database, database_initialization_command.c_str());
-    execute_sql_command(database, insert_example_game_command.c_str());
+    execute_sql_command(database, database_initialization_command);
+    addGame(database, "Devastating Fog", "");
+    addGame(database, "No Pirates Here!", "");
     printMessage("Database Initialized");        
 }
 
 int main() {
-    bool newCreation = not std::filesystem::exists("example_database");
+    bool newCreation = not std::filesystem::exists("data.db");
 
     char* messageError;
     sqlite3* database;
     sqlite3_stmt* stmt;
     int exit = 0;
-    exit = sqlite3_open("example_database", &database);
+    exit = sqlite3_open("data.db", &database);
 
     if (exit) {
         std::cerr << "Error opening database" << sqlite3_errmsg(database) << std::endl;
@@ -55,8 +63,6 @@ int main() {
     } 
     
     std::cout << "Opened database successfully!" << std::endl;
-    
-
 
     if (newCreation) {
         initialize_database(database);
@@ -72,15 +78,49 @@ int main() {
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         int id = sqlite3_column_int(stmt, 0);
-        const unsigned char* game_name = sqlite3_column_text(stmt, 1);
-        const unsigned char* path = sqlite3_column_text(stmt, 2);
+        const unsigned char* gameName = sqlite3_column_text(stmt, 1);
+        const unsigned char* gamePath = sqlite3_column_text(stmt, 2);
 
-        std::cout << game_name << ": " << path << std::endl;
-        gamePath.append(reinterpret_cast<const char*>(path));
+        std::cout << gameName << ": " << gamePath << std::endl;
+        std::string name{};
+        std::string path{};
+        name.append(reinterpret_cast<const char*>(gameName));
+        path.append(reinterpret_cast<const char*>(gamePath));
+        games[name] = path;
     }
     sqlite3_finalize(stmt);
 
     sqlite3_close(database);
-    system(gamePath.c_str());
+    int choice;
+    do {
+        system("clear");
+        std::cout << "Welcome to fluffy (0 - exit, 1-x - run a game)" << std::endl;
+        int i{ 1 };
+        for (const auto& [name, path] : games) {
+            std::cout << i ;
+            std::cout << ": " + name << std::endl;
+            i++;
+        }
+        
+        std::cin >> choice;
+        switch (choice)
+        {
+        case 0:
+            break;
+        default:
+            int i{ 1 };
+            std::string pathToRun = "";
+            for (const auto& [name, path] : games) {
+                if (i == choice) {
+                    pathToRun = path;
+                    
+                }
+                i++;
+            }
+            system(pathToRun.c_str());
+            break;
+        }
+    } while (choice != 0);
+
     return 0;
 }
