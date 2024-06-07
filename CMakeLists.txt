@@ -23,12 +23,12 @@ find_package(SQLite3 REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-add_executable(fluffy src/main.cpp src/sqlite3.c)
+add_executable(fluffy src/main.cpp)
 
 target_link_libraries(fluffy
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
-  PRIVATE ftxui::component # Not needed for this example.
+  PRIVATE ftxui::component
   PRIVATE SQLite::SQLite3
 )
 

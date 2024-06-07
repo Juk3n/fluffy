@@ -6,7 +6,7 @@
 #include <string>
 #include <cstdlib>
 #include <filesystem>
-#include <../include/sqlite3.h>
+#include <sqlite3.h>
 #include <map>
 
 
@@ -89,10 +89,8 @@ int main() {
         const unsigned char* gamePath = sqlite3_column_text(stmt, 2);
 
         std::cout << gameName << ": " << gamePath << std::endl;
-        std::string name{};
-        std::string path{};
-        name.append(reinterpret_cast<const char*>(gameName));
-        path.append(reinterpret_cast<const char*>(gamePath));
+        std::string name{reinterpret_cast<const char*>(gameName)};
+        std::string path{reinterpret_cast<const char*>(gamePath)};
         games[name] = path;
     }
     sqlite3_finalize(stmt);
@@ -107,16 +105,15 @@ int main() {
 
         auto summary = [&] {
             auto content = vbox(localGames);
-            return window(text(L" Fluffy v0.1 "), content);
+            return window(text(L" Games "), content);
         };
 
-        auto document =  //
-            vbox({
-                summary(),
-            });
-
-        // Limit the size of the document to 80 char.
-        document = document | size(WIDTH, LESS_THAN, 80);
+        auto document = vbox({
+            text(L" Fluffy v0.1 "),
+            vbox({summary()}),
+        });
+        
+        document = document | size(WIDTH, LESS_THAN, 120);
 
         auto screen = Screen::Create(Dimension::Full(), Dimension::Fit(document));
         Render(screen, document);
