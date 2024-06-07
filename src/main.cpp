@@ -1,9 +1,16 @@
+#include "ftxui/dom/elements.hpp"
+#include "ftxui/screen/screen.hpp"
+#include "ftxui/screen/string.hpp"
+
 #include <iostream>
 #include <string>
 #include <cstdlib>
 #include <filesystem>
 #include <../include/sqlite3.h>
 #include <map>
+
+
+using namespace ftxui;
 
 std::map<std::string, std::string> games;
 
@@ -90,18 +97,31 @@ int main() {
     }
     sqlite3_finalize(stmt);
 
-    sqlite3_close(database);
-    int choice;
+    int choice = 1;
     do {
         system("clear");
-        std::cout << "Welcome to fluffy (0 - exit, 1-x - run a game)" << std::endl;
-        int i{ 1 };
+        std::vector<Element> localGames = {};
         for (const auto& [name, path] : games) {
-            std::cout << i ;
-            std::cout << ": " + name << std::endl;
-            i++;
+            localGames.push_back(hbox({text(" " + name)}) | color(Color::Green));
         }
-        
+
+        auto summary = [&] {
+            auto content = vbox(localGames);
+            return window(text(L" Fluffy v0.1 "), content);
+        };
+
+        auto document =  //
+            vbox({
+                summary(),
+            });
+
+        // Limit the size of the document to 80 char.
+        document = document | size(WIDTH, LESS_THAN, 80);
+
+        auto screen = Screen::Create(Dimension::Full(), Dimension::Fit(document));
+        Render(screen, document);
+
+        std::cout << screen.ToString() << '\0' << std::endl;
         std::cin >> choice;
         switch (choice)
         {
@@ -121,6 +141,7 @@ int main() {
             break;
         }
     } while (choice != 0);
-
-    return 0;
+  
+    sqlite3_close(database);
+    return EXIT_SUCCESS;
 }
