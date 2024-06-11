@@ -1,6 +1,9 @@
 #include "ftxui/dom/elements.hpp"
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/screen/string.hpp"
+#include "ftxui/component/component.hpp"
+#include "ftxui/component/component_options.hpp"
+#include "ftxui/component/screen_interactive.hpp"
 
 #include <iostream>
 #include <string>
@@ -95,22 +98,12 @@ int main() {
     }
     sqlite3_finalize(stmt);
 
-    int choice = 1;
+    int exit_id = games.size();
+    int choice = 0;
     do {
         system("clear");
-        std::vector<Element> localGames = {};
-        for (const auto& [name, path] : games) {
-            localGames.push_back(hbox({text(" " + name)}) | color(Color::Green));
-        }
-
-        auto summary = [&] {
-            auto content = vbox(localGames);
-            return window(text(L" Games "), content);
-        };
-
         auto document = vbox({
-            text(L" Fluffy v0.1 "),
-            vbox({summary()}),
+            center(text(L" Fluffy v0.1 ")),
         });
         
         document = document | size(WIDTH, LESS_THAN, 120);
@@ -119,15 +112,26 @@ int main() {
         Render(screen, document);
 
         std::cout << screen.ToString() << '\0' << std::endl;
-        std::cin >> choice;
-        switch (choice)
-        {
-        case 0:
-            break;
-        default:
-            int i{ 1 };
+        
+        
+        auto menu_screen = ScreenInteractive::TerminalOutput();
+
+        std::vector<std::string> localGames = {};
+        for (const auto& [name, path] : games) {
+            localGames.push_back(name);
+        }
+        localGames.push_back("Exit");
+
+        MenuOption option;
+        option.on_enter = menu_screen.ExitLoopClosure();
+        auto menu = Menu(&localGames, &choice, option);
+        menu_screen.Loop(menu);
+        
+        if (choice != exit_id) {
+            int i{ 0 };
             std::string pathToRun = "";
             for (const auto& [name, path] : games) {
+                
                 if (i == choice) {
                     pathToRun = path;
                     
@@ -135,10 +139,8 @@ int main() {
                 i++;
             }
             system(pathToRun.c_str());
-            break;
         }
-    } while (choice != 0);
-  
+    } while (choice != exit_id);
     sqlite3_close(database);
     return EXIT_SUCCESS;
 }
