@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.14)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+project(fluffy LANGUAGES CXX VERSION 1.0.0)
 
 include(FetchContent)
 
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
   GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
-  GIT_TAG v5.0.0
+  GIT_TAG v4.0.0
 )
 FetchContent_MakeAvailable(ftxui)
 if(NOT ftxui_POPULATED)
@@ -13,10 +16,8 @@ if(NOT ftxui_POPULATED)
   add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-project(fluffy LANGUAGES CXX VERSION 1.0.0)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 
 
 find_package(SQLite3 REQUIRED)
