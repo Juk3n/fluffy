@@ -43,22 +43,54 @@ void execute_sql_command(sqlite3* database, std::string command) {
     }
 }
 
-void addGame(sqlite3* database, std::string name, std::string path) {
-    static int val = 1;
+void addGame(sqlite3* database, int id,  std::string name, std::string path) {
     std::string command = "INSERT INTO GAME (GAME_ID, GAME_NAME, GAME_PATH) VALUES (";
-    command += std::to_string(val) + ", '" + name + "', \"" + path + "\");";
-    val++;
+    command += std::to_string(id) + ", '" + name + "', \"" + path + "\");";
     execute_sql_command(database, command);
 }
 
 void initialize_database(sqlite3* database) {
     execute_sql_command(database, database_initialization_command);
-    addGame(database, "Devastating Fog", "");
-    addGame(database, "No Pirates Here!", "");
+    addGame(database, 1, "Devastating Fog", "");
+    addGame(database, 2, "No Pirates Here!", "");
     printMessage("Database Initialized");        
 }
 
-int main() {
+void handleCommand(int argc, char const *argv[], sqlite3* database) {
+    std::string command{};
+    switch (argc) {
+        case 2:
+            command = argv[1];
+            if (command == "show") {
+                for (const auto& [game, path] : games) {
+                    std::cout << game << ": " << path << std::endl;
+                }
+            }
+            break;
+        case 4:
+            command = argv[1];
+            if (command == "add") {
+                std::string gameName{ argv[2] };
+                auto localPath = std::filesystem::path(argv[3]);
+                std::string globalPath = std::filesystem::absolute(localPath).lexically_normal().string();
+                
+                std::string temp{};
+                for (const auto a : globalPath) {
+                    if (a != ' ') {
+                        temp += a;
+                    }
+                    else {
+                        temp += "\' \'";
+                    }
+                }
+
+                addGame(database, games.size() + 1, gameName, temp);
+            }
+            break;
+    }
+}
+
+int main(int argc, char const *argv[]) {
     bool newCreation = not std::filesystem::exists("data.db");
 
     char* messageError;
@@ -91,12 +123,16 @@ int main() {
         const unsigned char* gameName = sqlite3_column_text(stmt, 1);
         const unsigned char* gamePath = sqlite3_column_text(stmt, 2);
 
-        std::cout << gameName << ": " << gamePath << std::endl;
         std::string name{reinterpret_cast<const char*>(gameName)};
         std::string path{reinterpret_cast<const char*>(gamePath)};
         games[name] = path;
     }
     sqlite3_finalize(stmt);
+
+    if (argc > 1) {
+        handleCommand(argc, argv, database);
+        return 0;
+    }
 
     int exit_id = games.size();
     int choice = 0;
