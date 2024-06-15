@@ -104,7 +104,7 @@ int main(int argc, char const *argv[]) {
         std::string command{ argv[1] };
         std::string gameName{ argv[2] };
         auto localPath = std::filesystem::path(argv[3]);
-        std::string globalPath = std::filesystem::absolute(localPath).string();
+        std::string globalPath = std::filesystem::absolute(localPath).lexically_normal().string();
         
         std::string temp{};
         for (const auto a : globalPath) {
