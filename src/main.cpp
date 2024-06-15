@@ -56,6 +56,40 @@ void initialize_database(sqlite3* database) {
     printMessage("Database Initialized");        
 }
 
+void handleCommand(int argc, char const *argv[], sqlite3* database) {
+    std::string command{};
+    switch (argc) {
+        case 2:
+            command = argv[1];
+            if (command == "show") {
+                for (const auto& [game, path] : games) {
+                    std::cout << game << ": " << path << std::endl;
+                }
+            }
+            break;
+        case 4:
+            command = argv[1];
+            if (command == "add") {
+                std::string gameName{ argv[2] };
+                auto localPath = std::filesystem::path(argv[3]);
+                std::string globalPath = std::filesystem::absolute(localPath).lexically_normal().string();
+                
+                std::string temp{};
+                for (const auto a : globalPath) {
+                    if (a != ' ') {
+                        temp += a;
+                    }
+                    else {
+                        temp += "\' \'";
+                    }
+                }
+
+                addGame(database, games.size() + 1, gameName, temp);
+            }
+            break;
+    }
+}
+
 int main(int argc, char const *argv[]) {
     bool newCreation = not std::filesystem::exists("data.db");
 
@@ -89,34 +123,14 @@ int main(int argc, char const *argv[]) {
         const unsigned char* gameName = sqlite3_column_text(stmt, 1);
         const unsigned char* gamePath = sqlite3_column_text(stmt, 2);
 
-        std::cout << gameName << ": " << gamePath << std::endl;
         std::string name{reinterpret_cast<const char*>(gameName)};
         std::string path{reinterpret_cast<const char*>(gamePath)};
         games[name] = path;
     }
     sqlite3_finalize(stmt);
 
-    if (argc == 2) {
-        return 0;
-    }
-
-    if (argc == 4) {
-        std::string command{ argv[1] };
-        std::string gameName{ argv[2] };
-        auto localPath = std::filesystem::path(argv[3]);
-        std::string globalPath = std::filesystem::absolute(localPath).lexically_normal().string();
-        
-        std::string temp{};
-        for (const auto a : globalPath) {
-            if (a != ' ') {
-                temp += a;
-            }
-            else {
-                temp += "\' \'";
-            }
-        }
-
-        addGame(database, games.size() + 1, gameName, temp);
+    if (argc > 1) {
+        handleCommand(argc, argv, database);
         return 0;
     }
 
