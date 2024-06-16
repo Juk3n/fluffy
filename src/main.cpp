@@ -62,6 +62,16 @@ void initialize_database(sqlite3* database) {
     printMessage("Database Initialized");        
 }
 
+void runGame(sqlite3* database, std::string gameName) {
+    std::string pathToRun = "";
+    for (const auto& [name, path] : games) {
+        if (name == gameName) {
+            pathToRun = path;
+        }
+    }
+    system(pathToRun.c_str());
+}
+
 void handleCommand(int argc, char const *argv[], sqlite3* database) {
     std::string command{};
     switch (argc) {
@@ -78,6 +88,10 @@ void handleCommand(int argc, char const *argv[], sqlite3* database) {
             if (command == "rm") {
                 std::string gameName{ argv[2] };
                 removeGame(database, gameName);
+            }
+            else if(command == "play") {
+                std::string gameName{ argv[2] };
+                runGame(database, gameName);
             }
         case 4:
             command = argv[1];
@@ -177,16 +191,16 @@ int main(int argc, char const *argv[]) {
         
         if (choice != exit_id) {
             int i{ 0 };
-            std::string pathToRun = "";
+            std::string gameToRun = "";
             for (const auto& [name, path] : games) {
                 
                 if (i == choice) {
-                    pathToRun = path;
+                    gameToRun = name;
                     
                 }
                 i++;
             }
-            system(pathToRun.c_str());
+            runGame(database, gameToRun);
         }
     } while (choice != exit_id);
     sqlite3_close(database);
