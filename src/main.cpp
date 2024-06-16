@@ -73,6 +73,12 @@ void handleCommand(int argc, char const *argv[], sqlite3* database) {
                 }
             }
             break;
+        case 3:
+            command = argv[1];
+            if (command == "rm") {
+                std::string gameName{ argv[2] };
+                removeGame(database, gameName);
+            }
         case 4:
             command = argv[1];
             if (command == "add") {
