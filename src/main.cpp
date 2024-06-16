@@ -49,6 +49,12 @@ void addGame(sqlite3* database, int id,  std::string name, std::string path) {
     execute_sql_command(database, command);
 }
 
+void removeGame(sqlite3* database, std::string name) {
+    std::string command = "DELETE FROM GAME WHERE GAME_NAME=";
+    command += "'" + name + "';";
+    execute_sql_command(database, command);
+}
+
 void initialize_database(sqlite3* database) {
     execute_sql_command(database, database_initialization_command);
     addGame(database, 1, "Devastating Fog", "");
