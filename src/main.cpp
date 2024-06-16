@@ -62,6 +62,16 @@ void initialize_database(sqlite3* database) {
     printMessage("Database Initialized");        
 }
 
+void runGame(sqlite3* database, std::string gameName) {
+    std::string pathToRun = "";
+    for (const auto& [name, path] : games) {
+        if (name == gameName) {
+            pathToRun = path;
+        }
+    }
+    system(pathToRun.c_str());
+}
+
 void handleCommand(int argc, char const *argv[], sqlite3* database) {
     std::string command{};
     switch (argc) {
