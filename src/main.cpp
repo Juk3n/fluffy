@@ -43,7 +43,12 @@ void execute_sql_command(sqlite3* database, std::string command) {
     }
 }
 
-void addGame(sqlite3* database, int id,  std::string name, std::string path) {
+void addGame(sqlite3* database, std::string name, std::string path) {
+    int id = games.size() + 1; // calculateId();
+    addGameToDatabase(database, id, name, path);
+}
+
+void addGameToDatabase(sqlite3* database, int id,  std::string name, std::string path) {
     std::string command = "INSERT INTO GAME (GAME_ID, GAME_NAME, GAME_PATH) VALUES (";
     command += std::to_string(id) + ", '" + name + "', \"" + path + "\");";
     execute_sql_command(database, command);
@@ -57,9 +62,7 @@ void removeGame(sqlite3* database, std::string name) {
 
 void initialize_database(sqlite3* database) {
     execute_sql_command(database, database_initialization_command);
-    addGame(database, 1, "Devastating Fog", "");
-    addGame(database, 2, "No Pirates Here!", "");
-    printMessage("Database Initialized");        
+    printMessage("Database Initialized");
 }
 
 void runGame(sqlite3* database, std::string gameName) {
@@ -110,7 +113,7 @@ void handleCommand(int argc, char const *argv[], sqlite3* database) {
                     }
                 }
 
-                addGame(database, games.size() + 1, gameName, temp);
+                addGame(database, gameName, temp);
             }
             break;
     }
