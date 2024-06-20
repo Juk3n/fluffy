@@ -11,12 +11,13 @@
 #include <filesystem>
 #include <sqlite3.h>
 #include <map>
+#include <vector>
 
 #include <game.hpp>
 
 using namespace ftxui;
 
-std::map<std::string, std::string> games;
+std::vector<Game> games;
 
 std::string database_initialization_command = "CREATE TABLE GAME("
                                                 "GAME_ID INT PRIMARY KEY NOT NULL, "
@@ -25,7 +26,7 @@ std::string database_initialization_command = "CREATE TABLE GAME("
 
 const char* select_all_games_command = "SELECT * FROM GAME;";
 
-bool debugRun = true;
+bool debugRun = false;
 
 void printMessage(std::string message) {
     if (debugRun) {
@@ -52,15 +53,15 @@ int calculateFirstGameIdAvailable() {
     return availableId;
 }
 
-void addGame(sqlite3* database, std::string name, std::string path) {
-    int id = calculateFirstGameIdAvailable();
-    addGameToDatabase(database, id, name, path);
-}
-
 void addGameToDatabase(sqlite3* database, int id,  std::string name, std::string path) {
     std::string command = "INSERT INTO GAME (GAME_ID, GAME_NAME, GAME_PATH) VALUES (";
     command += std::to_string(id) + ", '" + name + "', \"" + path + "\");";
     execute_sql_command(database, command);
+}
+
+void addGame(sqlite3* database, std::string name, std::string path) {
+    int id = calculateFirstGameIdAvailable();
+    addGameToDatabase(database, id, name, path);
 }
 
 void removeGame(sqlite3* database, std::string name) {
@@ -76,9 +77,9 @@ void initialize_database(sqlite3* database) {
 
 void runGame(sqlite3* database, std::string gameName) {
     std::string pathToRun = "";
-    for (const auto& [name, path] : games) {
-        if (name == gameName) {
-            pathToRun = path;
+    for (auto& game : games) {
+        if (gameName == game.getName()) {
+            pathToRun = game.getPath();
         }
     }
     system(pathToRun.c_str());
@@ -90,8 +91,8 @@ void handleCommand(int argc, char const *argv[], sqlite3* database) {
         case 2:
             command = argv[1];
             if (command == "show") {
-                for (const auto& [game, path] : games) {
-                    std::cout << game << ": " << path << std::endl;
+                for (auto& game : games) {
+                    std::cout << game.getName() << ": " << game.getPath() << std::endl;
                 }
             }
             break;
@@ -142,7 +143,7 @@ int main(int argc, char const *argv[]) {
         return -1;
     } 
     
-    std::cout << "Opened database successfully!" << std::endl;
+    printMessage("Opened database successfully!");
 
     if (newCreation) {
         initialize_database(database);
@@ -161,9 +162,13 @@ int main(int argc, char const *argv[]) {
         const unsigned char* gameName = sqlite3_column_text(stmt, 1);
         const unsigned char* gamePath = sqlite3_column_text(stmt, 2);
 
-        std::string name{reinterpret_cast<const char*>(gameName)};
-        std::string path{reinterpret_cast<const char*>(gamePath)};
-        games[name] = path;
+        games.push_back(
+            Game {
+                id, 
+                reinterpret_cast<const char*>(gameName), 
+                reinterpret_cast<const char*>(gamePath)
+            }
+        );
     }
     sqlite3_finalize(stmt);
 
@@ -191,8 +196,8 @@ int main(int argc, char const *argv[]) {
         auto menu_screen = ScreenInteractive::TerminalOutput();
 
         std::vector<std::string> localGames = {};
-        for (const auto& [name, path] : games) {
-            localGames.push_back(name);
+        for (auto& game : games) {
+            localGames.push_back(game.getName());
         }
         localGames.push_back("Exit");
 
@@ -204,11 +209,10 @@ int main(int argc, char const *argv[]) {
         if (choice != exit_id) {
             int i{ 0 };
             std::string gameToRun = "";
-            for (const auto& [name, path] : games) {
+            for (auto& game : games) {
                 
                 if (i == choice) {
-                    gameToRun = name;
-                    
+                    gameToRun = game.getName();
                 }
                 i++;
             }
