@@ -12,6 +12,7 @@
 #include <sqlite3.h>
 #include <map>
 
+#include <game.hpp>
 
 using namespace ftxui;
 
@@ -43,8 +44,16 @@ void execute_sql_command(sqlite3* database, std::string command) {
     }
 }
 
+int calculateFirstGameIdAvailable() {
+    int availableId{};
+
+    availableId = games.size() + 1;
+
+    return availableId;
+}
+
 void addGame(sqlite3* database, std::string name, std::string path) {
-    int id = games.size() + 1; // calculateId();
+    int id = calculateFirstGameIdAvailable();
     addGameToDatabase(database, id, name, path);
 }
 
