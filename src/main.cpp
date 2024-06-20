@@ -26,7 +26,7 @@ std::string database_initialization_command = "CREATE TABLE GAME("
 
 const char* select_all_games_command = "SELECT * FROM GAME;";
 
-bool debugRun = false;
+bool debugRun = true;
 
 void printMessage(std::string message) {
     if (debugRun) {
@@ -48,7 +48,16 @@ void execute_sql_command(sqlite3* database, std::string command) {
 int calculateFirstGameIdAvailable() {
     int availableId{};
 
-    availableId = games.size() + 1;
+    std::vector<int> usedIds{};
+    for (auto& game : games) {
+        usedIds.push_back(game.getId());
+    }
+
+    bool found{ true };
+    while(found) {
+        found = std::find(usedIds.begin(), usedIds.end(), availableId) != std::end(usedIds);
+        availableId++;
+    }
 
     return availableId;
 }
@@ -164,8 +173,8 @@ int main(int argc, char const *argv[]) {
 
         games.push_back(
             Game {
-                id, 
-                reinterpret_cast<const char*>(gameName), 
+                id,
+                reinterpret_cast<const char*>(gameName),
                 reinterpret_cast<const char*>(gamePath)
             }
         );
