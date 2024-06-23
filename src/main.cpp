@@ -190,18 +190,26 @@ int main(int argc, char const *argv[]) {
     int choice = 0;
     do {
         system("clear");
-        auto document = vbox({
+        
+        auto header = vbox({
             center(text(L" Fluffy v0.1 ")),
         });
         
-        document = document | size(WIDTH, LESS_THAN, 120);
+        header = header | size(WIDTH, LESS_THAN, 120);
 
-        auto screen = Screen::Create(Dimension::Full(), Dimension::Fit(document));
-        Render(screen, document);
+        auto headerScreen = Screen::Create(Dimension::Full(), Dimension::Fit(header));
+        Render(headerScreen, header);
 
-        std::cout << screen.ToString() << '\0' << std::endl;
+        std::cout << headerScreen.ToString() << '\0' << std::endl;
         
-        
+        std::vector<std::string> menuOptions{
+            "Games",
+            "Info",
+        };
+        int menuOptionSelected{ 0 };
+        auto menuOptionToggle = Toggle(&menuOptions, &menuOptionSelected);
+
+
         auto menu_screen = ScreenInteractive::TerminalOutput();
 
         std::vector<std::string> localGames = {};
@@ -210,10 +218,36 @@ int main(int argc, char const *argv[]) {
         }
         localGames.push_back("Exit");
 
+
+        std::vector<std::string> info{
+            "test",
+        };
+        int info_selected = 0;
+
         MenuOption option;
         option.on_enter = menu_screen.ExitLoopClosure();
         auto menu = Menu(&localGames, &choice, option);
-        menu_screen.Loop(menu);
+
+        auto appContainer = Container::Tab({
+            Menu(&localGames, &choice, option),
+            Radiobox(&info, &info_selected),
+        }, &menuOptionSelected);
+
+        auto container = Container::Horizontal({
+            menuOptionToggle,
+            appContainer,
+        });
+
+        auto renderer = Renderer(container, [&] {
+            return vbox({
+                menuOptionToggle->Render(),
+                separator(),
+                appContainer->Render(),
+            }) | border;
+        });
+
+
+        menu_screen.Loop(renderer);
         
         if (choice != exit_id) {
             int i{ 0 };
