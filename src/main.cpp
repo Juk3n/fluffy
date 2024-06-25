@@ -21,12 +21,12 @@ using namespace ftxui;
 std::vector<Game> games;
 
 std::string database_initialization_command =
-    "CREATE TABLE GAME("
-    "GAME_ID INT PRIMARY KEY NOT NULL, "
+    "CREATE TABLE games("
+    "GAME_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
     "GAME_NAME TEXT NOT NULL, "
     "GAME_PATH TEXT NOT NULL);";
 
-std::string select_all_games_command = "SELECT * FROM GAME;";
+std::string select_all_games_command = "SELECT * FROM games;";
 
 bool debugRun = true;
 
@@ -47,39 +47,15 @@ void execute_sql_command(sqlite3 *database, std::string command) {
   }
 }
 
-auto calculateFirstGameIdAvailable() -> int {
-  int availableId{};
-
-  std::vector<int> usedIds{};
-  for (auto &game : games) {
-    usedIds.emplace_back(game.getId());
-  }
-
-  bool found{true};
-  while (found) {
-    found = std::find(usedIds.begin(), usedIds.end(), availableId) !=
-            std::end(usedIds);
-    availableId++;
-  }
-
-  return availableId;
-}
-
-void addGameToDatabase(sqlite3 *database, int id, std::string name,
-                       std::string path) {
+void addGame(sqlite3 *database, std::string name, std::string path) {
   std::string command =
-      "INSERT INTO GAME (GAME_ID, GAME_NAME, GAME_PATH) VALUES (";
-  command += std::to_string(id) + ", '" + name + "', \"" + path + "\");";
+      "INSERT INTO games (GAME_NAME, GAME_PATH) VALUES (";
+  command += "'" + name + "', \"" + path + "\");";
   execute_sql_command(database, command);
 }
 
-void addGame(sqlite3 *database, std::string name, std::string path) {
-  int id = calculateFirstGameIdAvailable();
-  addGameToDatabase(database, id, name, path);
-}
-
 void removeGame(sqlite3 *database, std::string name) {
-  std::string command = "DELETE FROM GAME WHERE GAME_NAME=";
+  std::string command = "DELETE FROM games WHERE GAME_NAME=";
   command += "'" + name + "';";
   execute_sql_command(database, command);
 }
