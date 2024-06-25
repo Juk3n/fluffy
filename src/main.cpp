@@ -174,13 +174,9 @@ auto main(int argc, char const *argv[]) -> int {
     return 0;
   }
 
-  int exit_id = games.size();
-  int choice = 0;
-  // do {
   system("clear");
 
   std::vector<std::string> menuOptions{
-      "Games (old)",
       "Games",
   };
   int menuOptionSelected{0};
@@ -199,14 +195,12 @@ auto main(int argc, char const *argv[]) -> int {
   }
 
   auto menu_screen = ScreenInteractive::TerminalOutput();
-  gamesContainer->Add(Button(
-      "Exit", [&] { menu_screen.ExitLoopClosure(); }, Style()));
-  MenuOption option;
-  // option.on_enter = menu_screen.ExitLoopClosure();
-  auto menu = Menu(&localGames, &choice, option);
+
+  auto quitButton = Button("Exit", menu_screen.ExitLoopClosure(), Style());
+  gamesContainer->Add(quitButton);
 
   auto appContainer =
-      Container::Tab({menu, gamesContainer}, &menuOptionSelected);
+      Container::Tab({gamesContainer}, &menuOptionSelected);
 
   auto container = Container::Horizontal({
       menuOptionToggle,
@@ -224,19 +218,6 @@ auto main(int argc, char const *argv[]) -> int {
 
   menu_screen.Loop(renderer);
 
-  // if (choice != exit_id) {
-  //   int i{0};
-  //   std::string gameToRun = "";
-  //   for (auto &game : games) {
-
-  //     if (i == choice) {
-  //       gameToRun = game.getName();
-  //     }
-  //     i++;
-  //   }
-  //   runGame(database, gameToRun);
-  // }
-  // } while (choice != exit_id);
   sqlite3_close(database);
   return EXIT_SUCCESS;
 }
