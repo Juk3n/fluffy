@@ -2,17 +2,18 @@
 
 #include <string>
 
-class Game
-{
+class Game {
 private:
-    int id;
-    std::string name;
-    std::string path;
-public:
-    Game(int id, std::string name, std::string path) : id{id}, name{name}, path{path} { }
-    ~Game() { }
+  int id;
+  std::string name;
+  std::string path;
 
-    int getId() { return id; }
-    std::string getName() { return name; }
-    std::string getPath() { return path; }
+public:
+  Game(int id, std::string name, std::string path)
+      : id{id}, name{name}, path{path} {}
+  ~Game() {}
+
+  int getId() { return id; }
+  std::string getName() { return name; }
+  std::string getPath() { return path; }
 };

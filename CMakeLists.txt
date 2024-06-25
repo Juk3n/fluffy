@@ -18,6 +18,8 @@ endif()
 
 
 
+find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
+set(CLANG_TIDY_COMMAND "${CLANG_TIDY}" "-checks=-*,modernize-*")
 
 
 find_package(SQLite3 REQUIRED)
@@ -26,12 +28,14 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_executable(fluffy src/main.cpp)
 
+
 target_link_libraries(fluffy
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component
   PRIVATE SQLite::SQLite3
 )
+set_target_properties(fluffy PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 
 if (EMSCRIPTEN) 
   string(APPEND CMAKE_CXX_FLAGS " -s USE_PTHREADS") 
