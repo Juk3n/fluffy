@@ -169,12 +169,16 @@ auto runConsoleApp(sqlite3* database) -> void {
 }
 
 auto main(int argc, char const *argv[]) -> int {
-  bool newCreation = not std::filesystem::exists("data.db");
+  auto appDirectory{ std::filesystem::path(argv[0])};
+  std::cout << appDirectory.parent_path().string() << std::endl;
+  auto databasePath{ std::filesystem::path(appDirectory.parent_path().string() + "/data.db")};
+  std::cout << databasePath.string() << std::endl;
+  bool newCreation = not std::filesystem::exists(databasePath.string());
   char *messageError;
   sqlite3 *database;
   sqlite3_stmt *stmt;
   int exit = 0;
-  exit = sqlite3_open("data.db", &database);
+  exit = sqlite3_open(databasePath.c_str(), &database);
 
   if (exit) {
     std::cerr << "Error opening database" << sqlite3_errmsg(database)
