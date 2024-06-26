@@ -39,7 +39,7 @@ void printMessage(std::string message) {
 void execute_sql_command(sqlite3 *database, std::string command) {
   int exit = 0;
   char *messageError;
-  exit = sqlite3_exec(database, command.c_str(), NULL, 0, &messageError);
+  exit = sqlite3_exec(database, command.c_str(), nullptr, nullptr, &messageError);
 
   if (exit != SQLITE_OK) {
     printMessage("Error with command: " + command + " " + messageError);
@@ -130,6 +130,44 @@ auto Style() -> ButtonOption {
   return option;
 }
 
+auto runConsoleApp(sqlite3* database) -> void {
+  system("clear");
+
+  std::vector<std::string> localGames = {};
+  for (auto &game : games) {
+    localGames.emplace_back(game.getName());
+  }
+  localGames.emplace_back("Exit");
+
+  auto gamesContainer{Container::Vertical({})};
+  for (auto &game : games) {
+    gamesContainer->Add(Button(
+        game.getName(), [&] { runGame(database, game.getName()); }, Style()));
+  }
+
+  auto menu_screen = ScreenInteractive::TerminalOutput();
+
+  auto quitButton = Button("Exit", menu_screen.ExitLoopClosure(), Style());
+  gamesContainer->Add(quitButton);
+
+  int menuOptionSelected{0};
+  auto appContainer =
+      Container::Tab({gamesContainer}, &menuOptionSelected);
+
+  auto container = Container::Horizontal({
+      appContainer,
+  });
+  auto renderer = Renderer(container, [&] {
+    return vbox({
+               center(text(L" Fluffy v0.1 ")),
+               appContainer->Render(),
+           }) |
+           border | size(WIDTH, LESS_THAN, 120);
+  });
+  menu_screen.Loop(renderer);
+
+}
+
 auto main(int argc, char const *argv[]) -> int {
   bool newCreation = not std::filesystem::exists("data.db");
   char *messageError;
@@ -150,7 +188,7 @@ auto main(int argc, char const *argv[]) -> int {
     initialize_database(database);
   }
 
-  exit = sqlite3_prepare_v2(database, select_all_games_command.c_str(), -1, &stmt, 0);
+  exit = sqlite3_prepare_v2(database, select_all_games_command.c_str(), -1, &stmt, nullptr);
 
   if (exit) {
     std::cerr << "Error retrieving data" << sqlite3_errmsg(database)
@@ -171,53 +209,11 @@ auto main(int argc, char const *argv[]) -> int {
 
   if (argc > 1) {
     handleCommand(argc, argv, database);
-    return 0;
   }
-
-  system("clear");
-
-  std::vector<std::string> menuOptions{
-      "Games",
-  };
-  int menuOptionSelected{0};
-  auto menuOptionToggle = Toggle(&menuOptions, &menuOptionSelected);
-
-  std::vector<std::string> localGames = {};
-  for (auto &game : games) {
-    localGames.emplace_back(game.getName());
+  else {
+    runConsoleApp(database);
   }
-  localGames.emplace_back("Exit");
-
-  auto gamesContainer{Container::Vertical({})};
-  for (auto &game : games) {
-    gamesContainer->Add(Button(
-        game.getName(), [&] { runGame(database, game.getName()); }, Style()));
-  }
-
-  auto menu_screen = ScreenInteractive::TerminalOutput();
-
-  auto quitButton = Button("Exit", menu_screen.ExitLoopClosure(), Style());
-  gamesContainer->Add(quitButton);
-
-  auto appContainer =
-      Container::Tab({gamesContainer}, &menuOptionSelected);
-
-  auto container = Container::Horizontal({
-      menuOptionToggle,
-      appContainer,
-  });
-
-  auto renderer = Renderer(container, [&] {
-    return vbox({
-               center(text(L" Fluffy v0.1 ")),
-               menuOptionToggle->Render(),
-               appContainer->Render(),
-           }) |
-           border | size(WIDTH, LESS_THAN, 120);
-  });
-
-  menu_screen.Loop(renderer);
-
+  
   sqlite3_close(database);
   return EXIT_SUCCESS;
 }
