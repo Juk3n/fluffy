@@ -28,7 +28,7 @@ std::string database_initialization_command =
 
 std::string select_all_games_command = "SELECT * FROM games;";
 
-bool debugRun = true;
+bool debugRun = false;
 
 void printMessage(std::string message) {
   if (debugRun) {
@@ -169,12 +169,14 @@ auto runConsoleApp(sqlite3* database) -> void {
 }
 
 auto main(int argc, char const *argv[]) -> int {
-  bool newCreation = not std::filesystem::exists("data.db");
+  auto appPath{ std::filesystem::path(argv[0])};
+  auto databasePath{ std::filesystem::path(appPath.parent_path().string() + "/data.db")};
+  bool newCreation = not std::filesystem::exists(databasePath.string());
   char *messageError;
   sqlite3 *database;
   sqlite3_stmt *stmt;
   int exit = 0;
-  exit = sqlite3_open("data.db", &database);
+  exit = sqlite3_open(databasePath.c_str(), &database);
 
   if (exit) {
     std::cerr << "Error opening database" << sqlite3_errmsg(database)
