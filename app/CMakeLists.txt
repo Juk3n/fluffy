@@ -39,6 +39,7 @@ add_executable(fluffy src/main.cpp)
 add_executable(
   hello_test
   tests/tests.cc
+  tests/gameTest.cpp
 )
 target_link_libraries(
   hello_test
