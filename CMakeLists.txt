@@ -17,6 +17,12 @@ if(NOT ftxui_POPULATED)
 endif()
 
 
+FetchContent_Declare(googletest
+  GIT_REPOSITORY https://github.com/google/googletest
+  GIT_TAG v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
+
 
 find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
 set(CLANG_TIDY_COMMAND "${CLANG_TIDY}" "-checks=-*,modernize-*")
@@ -25,9 +31,19 @@ set(CLANG_TIDY_COMMAND "${CLANG_TIDY}" "-checks=-*,modernize-*")
 find_package(SQLite3 REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
-
+enable_testing()
 add_executable(fluffy src/main.cpp)
 
+
+
+add_executable(
+  hello_test
+  tests/tests.cc
+)
+target_link_libraries(
+  hello_test
+  GTest::gtest_main
+)
 
 target_link_libraries(fluffy
   PRIVATE ftxui::screen
@@ -46,3 +62,9 @@ if (EMSCRIPTEN)
     configure_file("src/${file}" ${file})
   endforeach(file)
 endif() 
+
+
+
+
+include(GoogleTest)
+gtest_discover_tests(hello_test)
