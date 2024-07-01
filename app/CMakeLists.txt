@@ -24,8 +24,8 @@ FetchContent_Declare(googletest
 FetchContent_MakeAvailable(googletest)
 
 
-find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
-set(CLANG_TIDY_COMMAND "${CLANG_TIDY}" "-checks=-*,modernize-*")
+#find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
+#set(CLANG_TIDY_COMMAND "${CLANG_TIDY}" "-checks=-*,modernize-*")
 
 
 find_package(SQLite3 REQUIRED)
@@ -51,7 +51,7 @@ target_link_libraries(fluffy
   PRIVATE ftxui::component
   PRIVATE SQLite::SQLite3
 )
-set_target_properties(fluffy PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+#set_target_properties(fluffy PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 
 if (EMSCRIPTEN) 
   string(APPEND CMAKE_CXX_FLAGS " -s USE_PTHREADS") 
