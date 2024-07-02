@@ -13,6 +13,8 @@
 #include <sqlite3.h>
 #include <string>
 #include <vector>
+#include <unistd.h>
+#include <limits.h>
 
 #include <game.hpp>
 
@@ -168,7 +170,14 @@ auto runConsoleApp(sqlite3* database) -> void {
 
 }
 
+std::string getExecutablePath() {
+  char result[PATH_MAX];
+  ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+  return std::string(result, (count > 0) ? count : 0);
+}
+
 auto main(int argc, char const *argv[]) -> int {
+  std::cout << getExecutablePath() << std::endl;
   auto appPath{ std::filesystem::path(argv[0])};
   auto databasePath{ std::filesystem::path(appPath.parent_path().string() + "/data.db")};
   bool newCreation = not std::filesystem::exists(databasePath.string());
