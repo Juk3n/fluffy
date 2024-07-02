@@ -37,12 +37,11 @@ add_executable(fluffy src/main.cpp)
 
 
 add_executable(
-  hello_test
-  tests/tests.cc
+  tests
   tests/gameTest.cpp
 )
 target_link_libraries(
-  hello_test
+  tests
   GTest::gtest_main
 )
 
@@ -64,8 +63,5 @@ if (EMSCRIPTEN)
   endforeach(file)
 endif() 
 
-
-
-
 include(GoogleTest)
-gtest_discover_tests(hello_test)
+gtest_discover_tests(tests)
