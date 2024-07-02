@@ -17,17 +17,33 @@ if(NOT ftxui_POPULATED)
 endif()
 
 
+FetchContent_Declare(googletest
+  GIT_REPOSITORY https://github.com/google/googletest
+  GIT_TAG v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
 
-find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
-set(CLANG_TIDY_COMMAND "${CLANG_TIDY}" "-checks=-*,modernize-*")
+
+#find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
+#set(CLANG_TIDY_COMMAND "${CLANG_TIDY}" "-checks=-*,modernize-*")
 
 
 find_package(SQLite3 REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
-
+enable_testing()
 add_executable(fluffy src/main.cpp)
 
+
+
+add_executable(
+  tests
+  tests/gameTest.cpp
+)
+target_link_libraries(
+  tests
+  GTest::gtest_main
+)
 
 target_link_libraries(fluffy
   PRIVATE ftxui::screen
@@ -35,7 +51,7 @@ target_link_libraries(fluffy
   PRIVATE ftxui::component
   PRIVATE SQLite::SQLite3
 )
-set_target_properties(fluffy PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+#set_target_properties(fluffy PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 
 if (EMSCRIPTEN) 
   string(APPEND CMAKE_CXX_FLAGS " -s USE_PTHREADS") 
@@ -46,3 +62,6 @@ if (EMSCRIPTEN)
     configure_file("src/${file}" ${file})
   endforeach(file)
 endif() 
+
+include(GoogleTest)
+gtest_discover_tests(tests)
