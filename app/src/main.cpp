@@ -17,16 +17,13 @@
 #include <limits.h>
 
 #include <game.hpp>
+#include <database.hpp>
 
 using namespace ftxui;
 
 std::vector<Game> games;
 
-std::string database_initialization_command =
-    "CREATE TABLE games("
-    "GAME_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-    "GAME_NAME TEXT NOT NULL, "
-    "GAME_PATH TEXT NOT NULL);";
+Database databaseHandler;
 
 std::string select_all_games_command = "SELECT * FROM games;";
 
@@ -63,7 +60,7 @@ void removeGame(sqlite3 *database, std::string name) {
 }
 
 void initialize_database(sqlite3 *database) {
-  execute_sql_command(database, database_initialization_command);
+  execute_sql_command(database, databaseHandler.database_initialization_command);
   printMessage("Database Initialized");
 }
 
