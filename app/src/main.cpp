@@ -154,8 +154,8 @@ auto getExecutablePath() -> std::filesystem::path {
 }
 
 auto main(int argc, char const *argv[]) -> int {
-  auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db")};
   try {
+    auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db")};
     Database database{databasePath};
     games = database.getGames();
 
