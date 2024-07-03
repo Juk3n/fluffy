@@ -8,19 +8,26 @@
 class Database
 {
 private:
+    sqlite3 *database;
+
     std::string database_initialization_command =
         "CREATE TABLE games("
         "GAME_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
         "GAME_NAME TEXT NOT NULL, "
         "GAME_PATH TEXT NOT NULL);";
-public:
-    sqlite3 *database;
     std::string select_all_games_command = "SELECT * FROM games;";
 
-    Database(std::filesystem::path databasePath) {
-        database = loadDatabase(databasePath);
+    auto initializeDatabase() -> void {
+        executeSqlCommand(database_initialization_command);
+        //printMessage("Database Initialized");
     }
-    Database() = default;
+
+public:
+    bool successfullyCreated{ true };
+
+    Database(std::filesystem::path databasePath) {
+        loadDatabase(databasePath);
+    }
 
     ~Database() {
         sqlite3_close(database);
@@ -34,15 +41,13 @@ public:
         if (exit != SQLITE_OK) {
             //printMessage("Error with command: " + command + " " + messageError);
             sqlite3_free(messageError);
+            successfullyCreated = false;
         }
     }
 
-    auto initializeDatabase() -> void {
-        executeSqlCommand(database_initialization_command);
-        //printMessage("Database Initialized");
-    }
 
-    auto loadDatabase(std::filesystem::path databasePath) -> sqlite3* {
+
+    auto loadDatabase(std::filesystem::path databasePath) -> void {
         bool newCreation = not std::filesystem::exists(databasePath.string());
         
         int exit = 0;
@@ -51,7 +56,7 @@ public:
         if (exit) {
             std::cerr << "Error opening database" << sqlite3_errmsg(database)
                     << std::endl;
-            return nullptr;
+            successfullyCreated = false;
         }
 
         //printMessage("Opened database successfully!");
@@ -59,10 +64,9 @@ public:
         if (newCreation) {
             initializeDatabase();
         }
-        return database;
     }
 
-    auto gettingData() -> std::vector<Game> {
+    auto getGames() -> std::vector<Game> {
         sqlite3_stmt *stmt;
         int exit = 0;
         exit = sqlite3_prepare_v2(database, select_all_games_command.c_str(), -1, &stmt, nullptr);
@@ -85,6 +89,5 @@ public:
         }
         sqlite3_finalize(stmt);
         return games;
-
     }
 };

@@ -157,10 +157,9 @@ auto main(int argc, char const *argv[]) -> int {
   auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db")};
   Database database{databasePath};
   
-  if (!database.database) return EXIT_FAILURE;
+  if (!database.successfullyCreated) return EXIT_FAILURE;
 
-  games = database.gettingData();
-
+  games = database.getGames();
 
   if (argc > 1) {
     handleCommand(argc, argv, database);
