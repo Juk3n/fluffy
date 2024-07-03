@@ -25,7 +25,6 @@ std::vector<Game> games;
 
 Database databaseHandler;
 
-std::string select_all_games_command = "SELECT * FROM games;";
 
 bool debugRun = false;
 
@@ -35,34 +34,20 @@ void printMessage(std::string message) {
   }
 }
 
-void execute_sql_command(sqlite3 *database, std::string command) {
-  int exit = 0;
-  char *messageError;
-  exit = sqlite3_exec(database, command.c_str(), nullptr, nullptr, &messageError);
-
-  if (exit != SQLITE_OK) {
-    printMessage("Error with command: " + command + " " + messageError);
-    sqlite3_free(messageError);
-  }
-}
-
 void addGame(sqlite3 *database, std::string name, std::string path) {
   std::string command =
       "INSERT INTO games (GAME_NAME, GAME_PATH) VALUES (";
   command += "'" + name + "', \"" + path + "\");";
-  execute_sql_command(database, command);
+  databaseHandler.execute_sql_command(database, command);
 }
 
 void removeGame(sqlite3 *database, std::string name) {
   std::string command = "DELETE FROM games WHERE GAME_NAME=";
   command += "'" + name + "';";
-  execute_sql_command(database, command);
+  databaseHandler.execute_sql_command(database, command);
 }
 
-void initialize_database(sqlite3 *database) {
-  execute_sql_command(database, databaseHandler.database_initialization_command);
-  printMessage("Database Initialized");
-}
+
 
 void runGame(sqlite3 *database, std::string gameName) {
   std::string pathToRun = "";
@@ -177,7 +162,6 @@ auto main(int argc, char const *argv[]) -> int {
   std::filesystem::path appPath{ getExecutablePath() };
   auto databasePath{ std::filesystem::path(appPath.parent_path().string() + "/data.db")};
   bool newCreation = not std::filesystem::exists(databasePath.string());
-  char *messageError;
   sqlite3 *database;
   sqlite3_stmt *stmt;
   int exit = 0;
@@ -192,10 +176,10 @@ auto main(int argc, char const *argv[]) -> int {
   printMessage("Opened database successfully!");
 
   if (newCreation) {
-    initialize_database(database);
+    databaseHandler.initialize_database(database);
   }
 
-  exit = sqlite3_prepare_v2(database, select_all_games_command.c_str(), -1, &stmt, nullptr);
+  exit = sqlite3_prepare_v2(database, databaseHandler.select_all_games_command.c_str(), -1, &stmt, nullptr);
 
   if (exit) {
     std::cerr << "Error retrieving data" << sqlite3_errmsg(database)
