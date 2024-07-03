@@ -23,7 +23,6 @@ private:
     }
 
 public:
-    bool successfullyCreated{ true };
 
     Database(std::filesystem::path databasePath) {
         loadDatabase(databasePath);
@@ -41,7 +40,7 @@ public:
         if (exit != SQLITE_OK) {
             //printMessage("Error with command: " + command + " " + messageError);
             sqlite3_free(messageError);
-            successfullyCreated = false;
+            throw std::exception();
         }
     }
 
@@ -56,7 +55,7 @@ public:
         if (exit) {
             std::cerr << "Error opening database" << sqlite3_errmsg(database)
                     << std::endl;
-            successfullyCreated = false;
+            throw std::exception();
         }
 
         //printMessage("Opened database successfully!");
