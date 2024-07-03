@@ -25,28 +25,26 @@ std::vector<Game> games;
 
 bool debugRun = false;
 
-void printMessage(std::string message) {
+auto printMessage(std::string message) -> void {
   if (debugRun) {
     std::cout << message << std::endl;
   }
 }
 
-void addGame(Database& database, std::string name, std::string path) {
+auto addGame(Database& database, std::string name, std::string path) -> void {
   std::string command =
       "INSERT INTO games (GAME_NAME, GAME_PATH) VALUES (";
   command += "'" + name + "', \"" + path + "\");";
   database.execute_sql_command(command);
 }
 
-void removeGame(Database& database, std::string name) {
+auto removeGame(Database& database, std::string name) -> void{
   std::string command = "DELETE FROM games WHERE GAME_NAME=";
   command += "'" + name + "';";
   database.execute_sql_command(command);
 }
 
-
-
-void runGame(std::string gameName) {
+auto runGame(std::string gameName) -> void {
   std::string pathToRun = "";
   for (auto &game : games) {
     if (gameName == game.getName()) {
@@ -56,7 +54,7 @@ void runGame(std::string gameName) {
   system(pathToRun.c_str());
 }
 
-void handleCommand(int argc, char const *argv[], Database& database) {
+auto handleCommand(int argc, char const *argv[], Database& database) -> void{
   std::string command{};
   switch (argc) {
   case 2:
@@ -99,7 +97,7 @@ void handleCommand(int argc, char const *argv[], Database& database) {
   }
 }
 
-auto Style() -> ButtonOption {
+auto style() -> ButtonOption {
   auto option = ButtonOption::Border();
   option.transform = [](const EntryState &s) {
     auto element = text(s.label);
@@ -123,12 +121,12 @@ auto runConsoleApp() -> void {
   auto gamesContainer{Container::Vertical({})};
   for (auto &game : games) {
     gamesContainer->Add(Button(
-        game.getName(), [&] { runGame(game.getName()); }, Style()));
+        game.getName(), [&] { runGame(game.getName()); }, style()));
   }
 
   auto menu_screen = ScreenInteractive::TerminalOutput();
 
-  auto quitButton = Button("Exit", menu_screen.ExitLoopClosure(), Style());
+  auto quitButton = Button("Exit", menu_screen.ExitLoopClosure(), style());
   gamesContainer->Add(quitButton);
 
   int menuOptionSelected{0};
@@ -149,7 +147,7 @@ auto runConsoleApp() -> void {
 
 }
 
-std::filesystem::path getExecutablePath() {
+auto getExecutablePath() -> std::filesystem::path {
   char result[PATH_MAX];
   ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
   return std::filesystem::path(std::string(result, (count > 0) ? count : 0));

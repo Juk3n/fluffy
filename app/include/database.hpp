@@ -6,8 +6,6 @@
 class Database
 {
 private:
-    
-
     std::string database_initialization_command =
         "CREATE TABLE games("
         "GAME_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -26,7 +24,7 @@ public:
         sqlite3_close(database);
     }
 
-    void execute_sql_command(std::string command) {
+    auto execute_sql_command(std::string command) -> void {
         int exit = 0;
         char *messageError;
         exit = sqlite3_exec(database, command.c_str(), nullptr, nullptr, &messageError);
@@ -37,12 +35,12 @@ public:
         }
     }
 
-    void initialize_database() {
+    auto initialize_database() -> void {
         execute_sql_command(database_initialization_command);
         //printMessage("Database Initialized");
     }
 
-    sqlite3* load_database(std::filesystem::path databasePath) {
+    auto load_database(std::filesystem::path databasePath) -> sqlite3* {
         bool newCreation = not std::filesystem::exists(databasePath.string());
         
         int exit = 0;
