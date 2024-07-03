@@ -3,6 +3,8 @@
 #include <sqlite3.h>
 #include <string>
 
+#include <game.hpp>
+
 class Database
 {
 private:
@@ -16,7 +18,7 @@ public:
     std::string select_all_games_command = "SELECT * FROM games;";
 
     Database(std::filesystem::path databasePath) {
-        database = load_database(databasePath);
+        database = loadDatabase(databasePath);
     }
     Database() = default;
 
@@ -24,7 +26,7 @@ public:
         sqlite3_close(database);
     }
 
-    auto execute_sql_command(std::string command) -> void {
+    auto executeSqlCommand(std::string command) -> void {
         int exit = 0;
         char *messageError;
         exit = sqlite3_exec(database, command.c_str(), nullptr, nullptr, &messageError);
@@ -35,12 +37,12 @@ public:
         }
     }
 
-    auto initialize_database() -> void {
-        execute_sql_command(database_initialization_command);
+    auto initializeDatabase() -> void {
+        executeSqlCommand(database_initialization_command);
         //printMessage("Database Initialized");
     }
 
-    auto load_database(std::filesystem::path databasePath) -> sqlite3* {
+    auto loadDatabase(std::filesystem::path databasePath) -> sqlite3* {
         bool newCreation = not std::filesystem::exists(databasePath.string());
         
         int exit = 0;
@@ -55,8 +57,34 @@ public:
         //printMessage("Opened database successfully!");
 
         if (newCreation) {
-            initialize_database();
+            initializeDatabase();
         }
         return database;
+    }
+
+    auto gettingData() -> std::vector<Game> {
+        sqlite3_stmt *stmt;
+        int exit = 0;
+        exit = sqlite3_prepare_v2(database, select_all_games_command.c_str(), -1, &stmt, nullptr);
+
+        if (exit) {
+            std::cerr << "Error retrieving data" << sqlite3_errmsg(database)
+                    << std::endl;
+            sqlite3_close(database);
+            return {};
+        }
+
+        std::vector<Game> games;
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            int id = sqlite3_column_int(stmt, 0);
+            const unsigned char *gameName = sqlite3_column_text(stmt, 1);
+            const unsigned char *gamePath = sqlite3_column_text(stmt, 2);
+
+            games.emplace_back(Game{id, reinterpret_cast<const char *>(gameName),
+                                reinterpret_cast<const char *>(gamePath)});
+        }
+        sqlite3_finalize(stmt);
+        return games;
+
     }
 };

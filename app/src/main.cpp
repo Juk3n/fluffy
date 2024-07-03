@@ -35,13 +35,13 @@ auto addGame(Database& database, std::string name, std::string path) -> void {
   std::string command =
       "INSERT INTO games (GAME_NAME, GAME_PATH) VALUES (";
   command += "'" + name + "', \"" + path + "\");";
-  database.execute_sql_command(command);
+  database.executeSqlCommand(command);
 }
 
 auto removeGame(Database& database, std::string name) -> void{
   std::string command = "DELETE FROM games WHERE GAME_NAME=";
   command += "'" + name + "';";
-  database.execute_sql_command(command);
+  database.executeSqlCommand(command);
 }
 
 auto runGame(std::string gameName) -> void {
@@ -157,29 +157,10 @@ auto main(int argc, char const *argv[]) -> int {
   auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db")};
   Database database{databasePath};
   
-  if (!database.database) {
-    return -1;
-  }
-  sqlite3_stmt *stmt;
-  int exit = 0;
-  exit = sqlite3_prepare_v2(database.database, database.select_all_games_command.c_str(), -1, &stmt, nullptr);
+  if (!database.database) return EXIT_FAILURE;
 
-  if (exit) {
-    std::cerr << "Error retrieving data" << sqlite3_errmsg(database.database)
-              << std::endl;
-    sqlite3_close(database.database);
-    return -1;
-  }
+  games = database.gettingData();
 
-  while (sqlite3_step(stmt) == SQLITE_ROW) {
-    int id = sqlite3_column_int(stmt, 0);
-    const unsigned char *gameName = sqlite3_column_text(stmt, 1);
-    const unsigned char *gamePath = sqlite3_column_text(stmt, 2);
-
-    games.emplace_back(Game{id, reinterpret_cast<const char *>(gameName),
-                         reinterpret_cast<const char *>(gamePath)});
-  }
-  sqlite3_finalize(stmt);
 
   if (argc > 1) {
     handleCommand(argc, argv, database);
