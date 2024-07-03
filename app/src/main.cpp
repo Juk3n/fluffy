@@ -177,8 +177,7 @@ std::string getExecutablePath() {
 }
 
 auto main(int argc, char const *argv[]) -> int {
-  std::cout << getExecutablePath() << std::endl;
-  auto appPath{ std::filesystem::path(argv[0])};
+  std::filesystem::path appPath{ getExecutablePath() };
   auto databasePath{ std::filesystem::path(appPath.parent_path().string() + "/data.db")};
   bool newCreation = not std::filesystem::exists(databasePath.string());
   char *messageError;
