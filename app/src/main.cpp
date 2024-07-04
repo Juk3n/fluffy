@@ -1,10 +1,10 @@
-#include "ftxui/component/component.hpp"
-#include "ftxui/component/component_base.hpp"
-#include "ftxui/component/component_options.hpp"
-#include "ftxui/component/screen_interactive.hpp"
-#include "ftxui/dom/elements.hpp"
-#include "ftxui/screen/screen.hpp"
-#include "ftxui/screen/string.hpp"
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/component_base.hpp>
+#include <ftxui/component/component_options.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/screen.hpp>
+#include <ftxui/screen/string.hpp>
 
 #include <cstdlib>
 #include <filesystem>
@@ -54,46 +54,44 @@ auto runGame(std::string gameName) -> void {
   system(pathToRun.c_str());
 }
 
-auto handleCommand(int argc, char const *argv[], Database& database) -> void{
-  std::string command{};
-  switch (argc) {
-  case 2:
-    command = argv[1];
-    if (command == "show") {
-      for (auto &game : games) {
-        std::cout << game.getName() << ": " << game.getPath() << std::endl;
+auto handleCommand(const std::string& command, const std::vector<std::string>& arguments, Database& database) -> void{
+  if (command == "show") {
+    for (auto &game : games) {
+      std::cout << game.getName() << ": " << game.getPath() << std::endl;
+    }
+  }
+  else if (command == "rm") {
+    std::string gameName{arguments[0]};
+    removeGame(database, gameName);
+  }
+  else if (command == "add") {
+    std::string gameName{arguments[0]};
+    auto localPath = std::filesystem::path(arguments[1]);
+    std::string globalPath =
+        std::filesystem::absolute(localPath).lexically_normal().string();
+    std::string temp{};
+    for (const auto a : globalPath) {
+      if (a != ' ') {
+        temp += a;
+      } else {
+        temp += "\' \'";
       }
     }
-    break;
-  case 3:
-    command = argv[1];
-    if (command == "rm") {
-      std::string gameName{argv[2]};
-      removeGame(database, gameName);
-    } else if (command == "play") {
-      std::string gameName{argv[2]};
-      runGame(gameName);
-    }
-  case 4:
-    command = argv[1];
-    if (command == "add") {
-      std::string gameName{argv[2]};
-      auto localPath = std::filesystem::path(argv[3]);
-      std::string globalPath =
-          std::filesystem::absolute(localPath).lexically_normal().string();
 
-      std::string temp{};
-      for (const auto a : globalPath) {
-        if (a != ' ') {
-          temp += a;
-        } else {
-          temp += "\' \'";
-        }
-      }
-
-      addGame(database, gameName, temp);
-    }
-    break;
+    addGame(database, gameName, temp);
+  }
+  else if (command == "play") {
+    std::string gameName{arguments[0]};
+    runGame(gameName);
+  }
+  else if (command == "--version") {
+    std::cout << "fluffy v0.1.1" << std::endl;
+  }
+  else if (command == "--help") {
+    std::cout << "help" << std::endl;
+  }
+  else {
+    std::cout << "fluffy: '" << command << "' is not a fluffy command. See 'fluffy --help'" << std::endl;
   }
 }
 
@@ -147,10 +145,46 @@ auto runConsoleApp() -> void {
 
 }
 
+auto handleFlags(std::vector<std::string> flags) -> void {
+  for (const auto& flag : flags) {
+    if (flag == "-test") {
+      std::cout << "hello!" << std::endl;
+    }
+    else {
+      std::cout << "unkown option: '" << flag << "'" << std::endl;
+    }
+  }
+}
+
 auto getExecutablePath() -> std::filesystem::path {
   char result[PATH_MAX];
   ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
   return std::filesystem::path(std::string(result, (count > 0) ? count : 0));
+}
+
+auto parseFlags(int argc, char const *argv[]) -> std::vector<std::string> {
+  std::vector<std::string> flags;
+  for (int i = 1; i < argc; i ++) {
+    std::string appArgument = argv[i];
+    if (appArgument.size() < 2) continue;
+    if (appArgument[0] == '-' and appArgument[1] != '-') flags.emplace_back(appArgument);
+  }
+  return flags;
+}
+
+auto parseCommand(int argc, char const* argv[]) {
+  std::string command{};
+  std::vector<std::string> arguments{};
+  for (int i = 1; i < argc; i ++) {
+    std::string appArgument = argv[i];
+    if (appArgument.size() < 2) continue;
+    if ((appArgument[0] == '-' and appArgument[1] == '-') or appArgument[0] != '-') {
+      if (command == "") command = appArgument;
+      else arguments.emplace_back(appArgument);
+    }
+  }
+  struct Command { std::string command; std::vector<std::string> arguments; };
+  return Command{command, arguments};
 }
 
 auto main(int argc, char const *argv[]) -> int {
@@ -160,7 +194,11 @@ auto main(int argc, char const *argv[]) -> int {
     games = database.getGames();
 
     if (argc > 1) {
-      handleCommand(argc, argv, database);
+      auto flags = parseFlags(argc, argv);
+      auto [command, arguments] = parseCommand(argc, argv);
+
+      handleFlags(flags);
+      if (command != "") handleCommand(command, arguments, database);
     }
     else {
       runConsoleApp();
