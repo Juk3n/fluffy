@@ -13,7 +13,7 @@ public:
       : id{id}, name{name}, path{path} {}
   ~Game() {}
 
-  int getId() { return id; }
-  std::string getName() { return name; }
-  std::string getPath() { return path; }
+  auto getId() -> int { return id; }
+  auto getName() -> std::string { return name; }
+  auto getPath() -> std::string { return path; }
 };

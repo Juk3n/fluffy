@@ -17,57 +17,34 @@
 #include <limits.h>
 
 #include <game.hpp>
+#include <database.hpp>
 
 using namespace ftxui;
 
 std::vector<Game> games;
 
-std::string database_initialization_command =
-    "CREATE TABLE games("
-    "GAME_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-    "GAME_NAME TEXT NOT NULL, "
-    "GAME_PATH TEXT NOT NULL);";
-
-std::string select_all_games_command = "SELECT * FROM games;";
-
 bool debugRun = false;
 
-void printMessage(std::string message) {
+auto printMessage(std::string message) -> void {
   if (debugRun) {
     std::cout << message << std::endl;
   }
 }
 
-void execute_sql_command(sqlite3 *database, std::string command) {
-  int exit = 0;
-  char *messageError;
-  exit = sqlite3_exec(database, command.c_str(), nullptr, nullptr, &messageError);
-
-  if (exit != SQLITE_OK) {
-    printMessage("Error with command: " + command + " " + messageError);
-    sqlite3_free(messageError);
-  }
-}
-
-void addGame(sqlite3 *database, std::string name, std::string path) {
+auto addGame(Database& database, std::string name, std::string path) -> void {
   std::string command =
       "INSERT INTO games (GAME_NAME, GAME_PATH) VALUES (";
   command += "'" + name + "', \"" + path + "\");";
-  execute_sql_command(database, command);
+  database.executeSqlCommand(command);
 }
 
-void removeGame(sqlite3 *database, std::string name) {
+auto removeGame(Database& database, std::string name) -> void{
   std::string command = "DELETE FROM games WHERE GAME_NAME=";
   command += "'" + name + "';";
-  execute_sql_command(database, command);
+  database.executeSqlCommand(command);
 }
 
-void initialize_database(sqlite3 *database) {
-  execute_sql_command(database, database_initialization_command);
-  printMessage("Database Initialized");
-}
-
-void runGame(sqlite3 *database, std::string gameName) {
+auto runGame(std::string gameName) -> void {
   std::string pathToRun = "";
   for (auto &game : games) {
     if (gameName == game.getName()) {
@@ -77,7 +54,7 @@ void runGame(sqlite3 *database, std::string gameName) {
   system(pathToRun.c_str());
 }
 
-void handleCommand(int argc, char const *argv[], sqlite3 *database) {
+auto handleCommand(int argc, char const *argv[], Database& database) -> void{
   std::string command{};
   switch (argc) {
   case 2:
@@ -95,7 +72,7 @@ void handleCommand(int argc, char const *argv[], sqlite3 *database) {
       removeGame(database, gameName);
     } else if (command == "play") {
       std::string gameName{argv[2]};
-      runGame(database, gameName);
+      runGame(gameName);
     }
   case 4:
     command = argv[1];
@@ -120,7 +97,7 @@ void handleCommand(int argc, char const *argv[], sqlite3 *database) {
   }
 }
 
-auto Style() -> ButtonOption {
+auto style() -> ButtonOption {
   auto option = ButtonOption::Border();
   option.transform = [](const EntryState &s) {
     auto element = text(s.label);
@@ -132,7 +109,7 @@ auto Style() -> ButtonOption {
   return option;
 }
 
-auto runConsoleApp(sqlite3* database) -> void {
+auto runConsoleApp() -> void {
   system("clear");
 
   std::vector<std::string> localGames = {};
@@ -144,12 +121,12 @@ auto runConsoleApp(sqlite3* database) -> void {
   auto gamesContainer{Container::Vertical({})};
   for (auto &game : games) {
     gamesContainer->Add(Button(
-        game.getName(), [&] { runGame(database, game.getName()); }, Style()));
+        game.getName(), [&] { runGame(game.getName()); }, style()));
   }
 
   auto menu_screen = ScreenInteractive::TerminalOutput();
 
-  auto quitButton = Button("Exit", menu_screen.ExitLoopClosure(), Style());
+  auto quitButton = Button("Exit", menu_screen.ExitLoopClosure(), style());
   gamesContainer->Add(quitButton);
 
   int menuOptionSelected{0};
@@ -170,60 +147,28 @@ auto runConsoleApp(sqlite3* database) -> void {
 
 }
 
-std::string getExecutablePath() {
+auto getExecutablePath() -> std::filesystem::path {
   char result[PATH_MAX];
   ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-  return std::string(result, (count > 0) ? count : 0);
+  return std::filesystem::path(std::string(result, (count > 0) ? count : 0));
 }
 
 auto main(int argc, char const *argv[]) -> int {
-  std::filesystem::path appPath{ getExecutablePath() };
-  auto databasePath{ std::filesystem::path(appPath.parent_path().string() + "/data.db")};
-  bool newCreation = not std::filesystem::exists(databasePath.string());
-  char *messageError;
-  sqlite3 *database;
-  sqlite3_stmt *stmt;
-  int exit = 0;
-  exit = sqlite3_open(databasePath.c_str(), &database);
+  try {
+    auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db")};
+    Database database{databasePath};
+    games = database.getGames();
 
-  if (exit) {
-    std::cerr << "Error opening database" << sqlite3_errmsg(database)
-              << std::endl;
-    return -1;
+    if (argc > 1) {
+      handleCommand(argc, argv, database);
+    }
+    else {
+      runConsoleApp();
+    }
   }
-
-  printMessage("Opened database successfully!");
-
-  if (newCreation) {
-    initialize_database(database);
-  }
-
-  exit = sqlite3_prepare_v2(database, select_all_games_command.c_str(), -1, &stmt, nullptr);
-
-  if (exit) {
-    std::cerr << "Error retrieving data" << sqlite3_errmsg(database)
-              << std::endl;
-    sqlite3_close(database);
-    return -1;
-  }
-
-  while (sqlite3_step(stmt) == SQLITE_ROW) {
-    int id = sqlite3_column_int(stmt, 0);
-    const unsigned char *gameName = sqlite3_column_text(stmt, 1);
-    const unsigned char *gamePath = sqlite3_column_text(stmt, 2);
-
-    games.emplace_back(Game{id, reinterpret_cast<const char *>(gameName),
-                         reinterpret_cast<const char *>(gamePath)});
-  }
-  sqlite3_finalize(stmt);
-
-  if (argc > 1) {
-    handleCommand(argc, argv, database);
-  }
-  else {
-    runConsoleApp(database);
+  catch(...) {
+    return EXIT_FAILURE;
   }
   
-  sqlite3_close(database);
   return EXIT_SUCCESS;
 }
