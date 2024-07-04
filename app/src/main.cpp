@@ -84,6 +84,15 @@ auto handleCommand(const std::string& command, const std::vector<std::string>& a
     std::string gameName{arguments[0]};
     runGame(gameName);
   }
+  else if (command == "--version") {
+    std::cout << "fluffy v0.1.1" << std::endl;
+  }
+  else if (command == "--help") {
+    std::cout << "help" << std::endl;
+  }
+  else {
+    std::cout << "fluffy: '" << command << "' is not a fluffy command. See 'fluffy --help'" << std::endl;
+  }
 }
 
 auto style() -> ButtonOption {
@@ -136,6 +145,20 @@ auto runConsoleApp() -> void {
 
 }
 
+auto handleFlags(std::vector<std::string> flags) -> void {
+  for (const auto& flag : flags) {
+    if (flag == "--version") {
+      std::cout << "fluffy v0.1.1" << std::endl;
+    }
+    else if (flag == "--help") {
+      std::cout << "help" << std::endl;
+    }
+    else {
+      std::cout << "fluffy: '" << flag << "' is not a fluffy command. See 'fluffy --help'" << std::endl;
+    }
+  }
+}
+
 auto getExecutablePath() -> std::filesystem::path {
   char result[PATH_MAX];
   ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
@@ -146,7 +169,8 @@ auto parseFlags(int argc, char const *argv[]) -> std::vector<std::string> {
   std::vector<std::string> flags;
   for (int i = 1; i < argc; i ++) {
     std::string appArgument = argv[i];
-    if (appArgument[0] == '-') flags.emplace_back(appArgument);
+    if (appArgument.size() < 2) continue;
+    if (appArgument[0] == '-' and appArgument[1] != '-') flags.emplace_back(appArgument);
   }
   return flags;
 }
@@ -156,7 +180,8 @@ auto parseCommand(int argc, char const* argv[]) {
   std::vector<std::string> arguments{};
   for (int i = 1; i < argc; i ++) {
     std::string appArgument = argv[i];
-    if (appArgument[0] != '-') {
+    if (appArgument.size() < 2) continue;
+    if ((appArgument[0] == '-' and appArgument[1] == '-') or appArgument[0] != '-') {
       if (command == "") command = appArgument;
       else arguments.emplace_back(appArgument);
     }
@@ -175,7 +200,8 @@ auto main(int argc, char const *argv[]) -> int {
       auto flags = parseFlags(argc, argv);
       auto [command, arguments] = parseCommand(argc, argv);
 
-      handleCommand(command, arguments, database);
+      handleFlags(flags);
+      if (command != "") handleCommand(command, arguments, database);
     }
     else {
       runConsoleApp();
