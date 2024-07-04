@@ -147,14 +147,11 @@ auto runConsoleApp() -> void {
 
 auto handleFlags(std::vector<std::string> flags) -> void {
   for (const auto& flag : flags) {
-    if (flag == "--version") {
-      std::cout << "fluffy v0.1.1" << std::endl;
-    }
-    else if (flag == "--help") {
-      std::cout << "help" << std::endl;
+    if (flag == "-test") {
+      std::cout << "hello!" << std::endl;
     }
     else {
-      std::cout << "fluffy: '" << flag << "' is not a fluffy command. See 'fluffy --help'" << std::endl;
+      std::cout << "unkown option: '" << flag << "'" << std::endl;
     }
   }
 }
