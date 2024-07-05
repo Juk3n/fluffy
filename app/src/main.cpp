@@ -140,7 +140,7 @@ auto runConsoleApp() -> void {
   });
   auto renderer = Renderer(container, [&] {
     return vbox({
-               center(text(L" Fluffy v0.1 ")),
+               center(text(L" Fluffy v0.1.1 ")),
                appContainer->Render(),
            }) |
            border | size(WIDTH, LESS_THAN, 120);
