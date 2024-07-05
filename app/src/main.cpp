@@ -88,7 +88,11 @@ auto handleCommand(const std::string& command, const std::vector<std::string>& a
     std::cout << "fluffy v0.1.1" << std::endl;
   }
   else if (command == "--help") {
-    std::cout << "help" << std::endl;
+    std::cout << "fluffy commands:" << std::endl;
+    std::cout << "  play <game_name>              Runs a game" << std::endl;
+    std::cout << "  add <game_name> <game_path>   Add a game library" << std::endl;
+    std::cout << "  show                          Show all games added to library" << std::endl;
+    std::cout << "  rm <game_name>                Remove game from a library" << std::endl;
   }
   else {
     std::cout << "fluffy: '" << command << "' is not a fluffy command. See 'fluffy --help'" << std::endl;
@@ -136,7 +140,7 @@ auto runConsoleApp() -> void {
   });
   auto renderer = Renderer(container, [&] {
     return vbox({
-               center(text(L" Fluffy v0.1 ")),
+               center(text(L" Fluffy v0.1.1 ")),
                appContainer->Render(),
            }) |
            border | size(WIDTH, LESS_THAN, 120);
