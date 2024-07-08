@@ -21,15 +21,11 @@
 
 using namespace ftxui;
 
+
+std::string version{ "v0.1.2" };
 std::vector<Game> games;
 
 bool debugRun = false;
-
-auto printMessage(std::string message) -> void {
-  if (debugRun) {
-    std::cout << message << std::endl;
-  }
-}
 
 auto addGame(Database& database, std::string name, std::string path) -> void {
   std::string command =
@@ -85,7 +81,7 @@ auto handleCommand(const std::string& command, const std::vector<std::string>& a
     runGame(gameName);
   }
   else if (command == "--version") {
-    std::cout << "fluffy v0.1.1" << std::endl;
+    std::cout << "fluffy " + version << std::endl;
   }
   else if (command == "--help") {
     std::cout << "fluffy commands:" << std::endl;
@@ -140,7 +136,7 @@ auto runConsoleApp() -> void {
   });
   auto renderer = Renderer(container, [&] {
     return vbox({
-               center(text(L" Fluffy v0.1.1 ")),
+               center(text("Fluffy " + version)),
                appContainer->Render(),
            }) |
            border | size(WIDTH, LESS_THAN, 120);
