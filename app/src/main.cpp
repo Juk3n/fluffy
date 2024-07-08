@@ -18,14 +18,14 @@
 
 #include <game.hpp>
 #include <database.hpp>
+#include <output.hpp>
 
 using namespace ftxui;
 
-
+Output output{};
 std::string version{ "v0.1.2" };
 std::vector<Game> games;
 
-bool debugRun = false;
 
 auto addGame(Database& database, std::string name, std::string path) -> void {
   std::string command =
@@ -81,17 +81,17 @@ auto handleCommand(const std::string& command, const std::vector<std::string>& a
     runGame(gameName);
   }
   else if (command == "--version") {
-    std::cout << "fluffy " + version << std::endl;
+    output.printMessage("fluffy " + version);
   }
   else if (command == "--help") {
-    std::cout << "fluffy commands:" << std::endl;
-    std::cout << "  play <game_name>              Runs a game" << std::endl;
-    std::cout << "  add <game_name> <game_path>   Add a game library" << std::endl;
-    std::cout << "  show                          Show all games added to library" << std::endl;
-    std::cout << "  rm <game_name>                Remove game from a library" << std::endl;
+    output.printMessage("fluffy commands:\n \
+  play <game_name>              Runs a game\n \
+  add <game_name> <game_path>   Add a game library\n \
+  show                          Show all games added to library\n \
+  rm <game_name>                Remove game from a library");
   }
   else {
-    std::cout << "fluffy: '" << command << "' is not a fluffy command. See 'fluffy --help'" << std::endl;
+    output.printMessage("fluffy: '" + command + "' is not a fluffy command. See 'fluffy --help'");
   }
 }
 
@@ -148,10 +148,10 @@ auto runConsoleApp() -> void {
 auto handleFlags(std::vector<std::string> flags) -> void {
   for (const auto& flag : flags) {
     if (flag == "-test") {
-      std::cout << "hello!" << std::endl;
+      output.printMessage("hello!");
     }
     else {
-      std::cout << "unkown option: '" << flag << "'" << std::endl;
+      output.printMessage("unkown option: '" + flag + "'");
     }
   }
 }

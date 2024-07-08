@@ -15,4 +15,7 @@ public:
         if (debugRun)
             std::cerr << message << std::endl;
     }
+    auto printMessage(std::string message) -> void {
+        std::cout << message << std::endl;
+    }
 };
