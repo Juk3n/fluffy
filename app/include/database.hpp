@@ -4,10 +4,12 @@
 #include <string>
 
 #include <game.hpp>
+#include <output.hpp>
 
 class Database
 {
 private:
+    Output output{};
     sqlite3 *database;
 
     std::string database_initialization_command =
@@ -19,7 +21,7 @@ private:
 
     auto initializeDatabase() -> void {
         executeSqlCommand(database_initialization_command);
-        //printMessage("Database Initialized");
+        output.printDebugMessage("Database Initialized");
     }
 
 public:
@@ -38,7 +40,8 @@ public:
         exit = sqlite3_exec(database, command.c_str(), nullptr, nullptr, &messageError);
 
         if (exit != SQLITE_OK) {
-            //printMessage("Error with command: " + command + " " + messageError);
+            
+            output.printDebugMessage("Error with command: " + command + " " + messageError);
             sqlite3_free(messageError);
             throw std::exception();
         }
@@ -53,12 +56,11 @@ public:
         exit = sqlite3_open(databasePath.c_str(), &database);
 
         if (exit) {
-            std::cerr << "Error opening database" << sqlite3_errmsg(database)
-                    << std::endl;
+            output.printDebugError("Error opening database" + std::string{sqlite3_errmsg(database)});
             throw std::exception();
         }
 
-        //printMessage("Opened database successfully!");
+        output.printDebugMessage("Opened database successfully!");
 
         if (newCreation) {
             initializeDatabase();
@@ -71,8 +73,7 @@ public:
         exit = sqlite3_prepare_v2(database, select_all_games_command.c_str(), -1, &stmt, nullptr);
 
         if (exit) {
-            std::cerr << "Error retrieving data" << sqlite3_errmsg(database)
-                    << std::endl;
+            output.printDebugError("Error retrieving data" + std::string{sqlite3_errmsg(database)});
             sqlite3_close(database);
             return {};
         }
