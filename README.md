@@ -1,6 +1,4 @@
-# fluffy - terminal game launcher
-
-(only on linux)
+# fluffy - CLI Game Launcher for Linux
 
 Fluffy's goal is to provide simple and fast possibility to run games from user defined directories and store all the required paths in one place.
 
