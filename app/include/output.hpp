@@ -7,6 +7,10 @@ class Output {
 private:
     bool debugRun = false;
 public:
+    auto turnOnDebug() -> void {
+        debugRun = true;
+    }
+
     auto printDebugMessage(std::string message) -> void {
         if (debugRun)
             std::cout << message << std::endl;
