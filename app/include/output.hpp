@@ -9,6 +9,7 @@ private:
 public:
     auto turnOnDebug() -> void {
         debugRun = true;
+        printDebugMessage("Debug mode on");
     }
 
     auto printDebugMessage(std::string message) -> void {
