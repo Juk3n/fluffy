@@ -2,6 +2,7 @@
 
 #include <sqlite3.h>
 #include <string>
+#include <memory>
 
 #include <game.hpp>
 #include <output.hpp>
@@ -9,7 +10,7 @@
 class Database
 {
 private:
-    Output output{};
+    std::shared_ptr<Output> output{};
     sqlite3 *database;
 
     std::string database_initialization_command =
@@ -21,12 +22,13 @@ private:
 
     auto initializeDatabase() -> void {
         executeSqlCommand(database_initialization_command);
-        output.printDebugMessage("Database Initialized");
+        output->printDebugMessage("Database Initialized");
     }
 
 public:
 
-    Database(std::filesystem::path databasePath) {
+    Database(std::filesystem::path databasePath, std::shared_ptr<Output> output) {
+        this->output = output;
         loadDatabase(databasePath);
     }
 
@@ -41,7 +43,7 @@ public:
 
         if (exit != SQLITE_OK) {
             
-            output.printDebugMessage("Error with command: " + command + " " + messageError);
+            output->printDebugMessage("Error with command: " + command + " " + messageError);
             sqlite3_free(messageError);
             throw std::exception();
         }
@@ -56,11 +58,11 @@ public:
         exit = sqlite3_open(databasePath.c_str(), &database);
 
         if (exit) {
-            output.printDebugError("Error opening database" + std::string{sqlite3_errmsg(database)});
+            output->printDebugError("Error opening database" + std::string{sqlite3_errmsg(database)});
             throw std::exception();
         }
 
-        output.printDebugMessage("Opened database successfully!");
+        output->printDebugMessage("Opened database successfully!");
 
         if (newCreation) {
             initializeDatabase();
@@ -73,7 +75,7 @@ public:
         exit = sqlite3_prepare_v2(database, select_all_games_command.c_str(), -1, &stmt, nullptr);
 
         if (exit) {
-            output.printDebugError("Error retrieving data" + std::string{sqlite3_errmsg(database)});
+            output->printDebugError("Error retrieving data" + std::string{sqlite3_errmsg(database)});
             sqlite3_close(database);
             return {};
         }

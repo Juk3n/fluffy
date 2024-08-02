@@ -15,6 +15,7 @@
 #include <vector>
 #include <unistd.h>
 #include <limits.h>
+#include <memory>
 
 #include <game.hpp>
 #include <database.hpp>
@@ -22,10 +23,9 @@
 
 using namespace ftxui;
 
-Output output{};
+std::shared_ptr<Output> output{};
 std::string version{ "v0.1.2" };
 std::vector<Game> games;
-
 
 auto addGame(Database& database, std::string name, std::string path) -> void {
   std::string command =
@@ -81,17 +81,17 @@ auto handleCommand(const std::string& command, const std::vector<std::string>& a
     runGame(gameName);
   }
   else if (command == "--version") {
-    output.printMessage("fluffy " + version);
+    output->printMessage("fluffy " + version);
   }
   else if (command == "--help") {
-    output.printMessage("fluffy commands:\n \
+    output->printMessage("fluffy commands:\n \
   play <game_name>              Runs a game\n \
   add <game_name> <game_path>   Add a game library\n \
   show                          Show all games added to library\n \
   rm <game_name>                Remove game from a library");
   }
   else {
-    output.printMessage("fluffy: '" + command + "' is not a fluffy command. See 'fluffy --help'");
+    output->printMessage("fluffy: '" + command + "' is not a fluffy command. See 'fluffy --help'");
   }
 }
 
@@ -147,11 +147,11 @@ auto runConsoleApp() -> void {
 
 auto handleFlags(std::vector<std::string> flags) -> void {
   for (const auto& flag : flags) {
-    if (flag == "-test") {
-      output.printMessage("hello!");
+    if (flag == "-d") {
+      output->turnOnDebug();
     }
     else {
-      output.printMessage("unkown option: '" + flag + "'");
+      output->printMessage("unkown option: '" + flag + "'");
     }
   }
 }
@@ -189,15 +189,16 @@ auto parseCommand(int argc, char const* argv[]) {
 
 auto main(int argc, char const *argv[]) -> int {
   try {
+    output = std::make_shared<Output>();
+    auto flags = parseFlags(argc, argv);
+    handleFlags(flags);
+
     auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db")};
-    Database database{databasePath};
+    Database database{databasePath, output};
     games = database.getGames();
 
-    if (argc > 1) {
-      auto flags = parseFlags(argc, argv);
+    if (argc - flags.size() > 1) {
       auto [command, arguments] = parseCommand(argc, argv);
-
-      handleFlags(flags);
       if (command != "") handleCommand(command, arguments, database);
     }
     else {
