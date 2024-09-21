@@ -3,6 +3,18 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 project(fluffy LANGUAGES CXX VERSION 1.0.0)
 
+#Enable code coverage flags
+option(CODE_COVERAGE "Enable code coverage" OFF)
+
+if (CODE_COVERAGE)
+  if (CMAKE_COMPILER_IS_GNUCXX)
+    add_compile_options(-g -00 --coverage)
+    add_link_options(--coverage)
+  else()
+    message(WARNING "Code coverage is only supported with GCC")
+  endif()
+endif()
+
 include(FetchContent)
 
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
