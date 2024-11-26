@@ -28,13 +28,12 @@ using namespace ftxui;
 
 class FluffyApplication {
 public:
-    std::shared_ptr<Output> output{};
-    std::string version{ "v0.1.2" };
-    std::vector<Game> games;
-
     FluffyApplication(int argc, char const *argv[]);
     
-    
+private:
+    std::shared_ptr<Output> output{};
+    std::string version{ "v0.1.3" };
+    std::vector<Game> games;
 
     auto addGame(Database& database, std::string name, std::string path) -> void;
 

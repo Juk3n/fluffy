@@ -167,7 +167,7 @@ FluffyApplication::FluffyApplication(int argc, char const *argv[]) {
     auto flags = parseFlags(argc, argv);
     handleFlags(flags);
 
-    auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db")};
+    auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db") };
     Database database{databasePath, output};
     games = database.getGames();
 
