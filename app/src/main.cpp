@@ -20,6 +20,7 @@
 #include <game.hpp>
 #include <database.hpp>
 #include <output.hpp>
+#include <fluffyApplication.hpp>
 
 using namespace ftxui;
 
@@ -189,6 +190,7 @@ auto parseCommand(int argc, char const* argv[]) {
 
 auto main(int argc, char const *argv[]) -> int {
   try {
+    auto app = FluffyApplication{};
     output = std::make_shared<Output>();
     auto flags = parseFlags(argc, argv);
     handleFlags(flags);
