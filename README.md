@@ -30,4 +30,6 @@ user:~/some/path$ fluffy rm game_name
 
 ## Installation
 
-(work in progress)
+- Move fluffy to the target folder (after the first run it will create an sql file)
+- Downloaded file is ready to use
+
