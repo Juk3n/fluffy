@@ -2,38 +2,23 @@
 
 #include <iostream>
 
-auto FluffyApplication::addGame(Database& database, std::string name, std::string path) -> void {
-    std::string command =
-        "INSERT INTO games (GAME_NAME, GAME_PATH) VALUES (";
-    command += "'" + name + "', \"" + path + "\");";
-    database.executeSqlCommand(command);
-}
-
-auto FluffyApplication::removeGame(Database& database, std::string name) -> void{
-    std::string command = "DELETE FROM games WHERE GAME_NAME=";
-    command += "'" + name + "';";
-    database.executeSqlCommand(command);
-}
-
 auto FluffyApplication::runGame(std::string gameName) -> void {
-    std::string pathToRun = "";
-    for (auto &game : games) {
-        if (gameName == game.getName()) {
-        pathToRun = game.getPath();
-        }
-    }
+    std::string pathToRun = gameRepository->getGameByName(gameName).getPath();
     system(pathToRun.c_str());
 }
 
-auto FluffyApplication::handleCommand(const std::string& command, const std::vector<std::string>& arguments, Database& database) -> void{
+auto FluffyApplication::handleCommand(
+    const std::string& command,
+    const std::vector<std::string>& arguments
+) -> void {
     if (command == "show") {
-        for (auto &game : games) {
+        for (auto &game : gameRepository->getGames()) {
         std::cout << game.getName() << ": " << game.getPath() << std::endl;
         }
     }
     else if (command == "rm") {
         std::string gameName{arguments[0]};
-        removeGame(database, gameName);
+        gameRepository->deleteGame(gameName);
     }
     else if (command == "add") {
         std::string gameName{arguments[0]};
@@ -49,7 +34,7 @@ auto FluffyApplication::handleCommand(const std::string& command, const std::vec
         }
         }
 
-        addGame(database, gameName, temp);
+        gameRepository->addGame(gameName, temp);
     }
     else if (command == "play") {
         std::string gameName{arguments[0]};
@@ -74,10 +59,10 @@ auto FluffyApplication::handleCommand(const std::string& command, const std::vec
 auto FluffyApplication::handleFlags(std::vector<std::string> flags) -> void {
     for (const auto& flag : flags) {
         if (flag == "-d") {
-        output->turnOnDebug();
+            output->turnOnDebug();
         }
         else {
-        output->printMessage("unkown option: '" + flag + "'");
+            output->printMessage("unkown option: '" + flag + "'");
         }
     }
 }
@@ -115,18 +100,20 @@ auto FluffyApplication::parseCommand(int argc, char const* argv[]) {
 
 FluffyApplication::FluffyApplication(int argc, char const *argv[]) {
     output = std::make_shared<Output>();
-    auto flags = parseFlags(argc, argv);
-    handleFlags(flags);
 
     auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db") };
-    Database database{databasePath, output};
-    games = database.getGames();
+    
+    gameRepository = std::make_unique<GameRepository>(
+        std::make_unique<Database>(databasePath, output)
+    );
 
+    auto flags = parseFlags(argc, argv);
+    handleFlags(flags);
     if (argc - flags.size() > 1) {
       auto [command, arguments] = parseCommand(argc, argv);
-      if (command != "") handleCommand(command, arguments, database);
+      if (command != "") handleCommand(command, arguments);
     }
     else {
-        handleCommand("--help", {}, database);
+        handleCommand("--help", {});
     }    
 }

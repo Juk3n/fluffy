@@ -18,7 +18,7 @@ find_package(SQLite3 REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 enable_testing()
-add_executable(fluffy src/main.cpp src/fluffyApplication.cpp)
+add_executable(fluffy src/main.cpp src/fluffyApplication.cpp src/gameRepository.cpp)
 
 add_executable(
   tests
