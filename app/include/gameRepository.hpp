@@ -11,8 +11,6 @@ private:
     std::unique_ptr<Database> database = nullptr;
 
 public:
-    GameRepository();
-
     GameRepository(std::unique_ptr<Database> database);
     
     void addGame(const std::string &name, const std::string &path);

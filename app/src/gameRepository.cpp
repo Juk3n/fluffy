@@ -1,10 +1,5 @@
 #include "gameRepository.hpp"
 
-GameRepository::GameRepository()
-{
-    this->database = nullptr;
-}
-
 GameRepository::GameRepository(std::unique_ptr<Database> database)
 {
     this->database = std::move(database);

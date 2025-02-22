@@ -3,7 +3,7 @@
 #include <iostream>
 
 auto FluffyApplication::runGame(std::string gameName) -> void {
-    std::string pathToRun = gameRepository.getGameByName(gameName).getPath();
+    std::string pathToRun = gameRepository->getGameByName(gameName).getPath();
     system(pathToRun.c_str());
 }
 
@@ -12,13 +12,13 @@ auto FluffyApplication::handleCommand(
     const std::vector<std::string>& arguments
 ) -> void {
     if (command == "show") {
-        for (auto &game : gameRepository.getGames()) {
+        for (auto &game : gameRepository->getGames()) {
         std::cout << game.getName() << ": " << game.getPath() << std::endl;
         }
     }
     else if (command == "rm") {
         std::string gameName{arguments[0]};
-        gameRepository.deleteGame(gameName);
+        gameRepository->deleteGame(gameName);
     }
     else if (command == "add") {
         std::string gameName{arguments[0]};
@@ -34,7 +34,7 @@ auto FluffyApplication::handleCommand(
         }
         }
 
-        gameRepository.addGame(gameName, temp);
+        gameRepository->addGame(gameName, temp);
     }
     else if (command == "play") {
         std::string gameName{arguments[0]};
@@ -59,10 +59,10 @@ auto FluffyApplication::handleCommand(
 auto FluffyApplication::handleFlags(std::vector<std::string> flags) -> void {
     for (const auto& flag : flags) {
         if (flag == "-d") {
-        output->turnOnDebug();
+            output->turnOnDebug();
         }
         else {
-        output->printMessage("unkown option: '" + flag + "'");
+            output->printMessage("unkown option: '" + flag + "'");
         }
     }
 }
@@ -103,9 +103,9 @@ FluffyApplication::FluffyApplication(int argc, char const *argv[]) {
 
     auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db") };
     
-    gameRepository = GameRepository{ 
-        std::make_unique<Database>(databasePath, output) 
-    };
+    gameRepository = std::make_unique<GameRepository>(
+        std::make_unique<Database>(databasePath, output)
+    );
 
     auto flags = parseFlags(argc, argv);
     handleFlags(flags);

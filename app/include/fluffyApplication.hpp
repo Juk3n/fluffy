@@ -22,7 +22,7 @@ public:
     FluffyApplication(int argc, char const *argv[]);
     
 private:
-    GameRepository gameRepository;
+    std::unique_ptr<GameRepositoryInterface> gameRepository = nullptr;
     std::shared_ptr<Output> output{};
     std::string version{ "v0.1.3" };
     
