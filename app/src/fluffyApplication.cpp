@@ -127,6 +127,6 @@ FluffyApplication::FluffyApplication(int argc, char const *argv[]) {
       if (command != "") handleCommand(command, arguments, database);
     }
     else {
-      //runConsoleApp();
+        handleCommand("--help", {}, database);
     }    
 }
