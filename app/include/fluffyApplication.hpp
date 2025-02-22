@@ -25,8 +25,7 @@ private:
     GameRepository gameRepository;
     std::shared_ptr<Output> output{};
     std::string version{ "v0.1.3" };
-    std::vector<Game> games;
-
+    
     auto addGame(Database& database, std::string name, std::string path) -> void;
 
     auto removeGame(Database& database, std::string name) -> void;

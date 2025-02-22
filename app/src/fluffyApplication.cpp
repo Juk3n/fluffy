@@ -12,7 +12,7 @@ auto FluffyApplication::handleCommand(
     const std::vector<std::string>& arguments
 ) -> void {
     if (command == "show") {
-        for (auto &game : games) {
+        for (auto &game : gameRepository.getGames()) {
         std::cout << game.getName() << ": " << game.getPath() << std::endl;
         }
     }
@@ -106,8 +106,6 @@ FluffyApplication::FluffyApplication(int argc, char const *argv[]) {
     gameRepository = GameRepository{ 
         std::make_unique<Database>(databasePath, output) 
     };
-
-    games = gameRepository.getGames();
 
     auto flags = parseFlags(argc, argv);
     handleFlags(flags);
