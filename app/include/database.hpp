@@ -3,6 +3,7 @@
 #include <sqlite3.h>
 #include <string>
 #include <memory>
+#include <filesystem>
 
 #include <game.hpp>
 #include <output.hpp>
