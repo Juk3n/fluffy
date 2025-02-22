@@ -70,55 +70,6 @@ auto FluffyApplication::handleCommand(const std::string& command, const std::vec
     }
 }
 
-auto FluffyApplication::style() -> ButtonOption {
-    auto option = ButtonOption::Border();
-    option.transform = [](const EntryState &s) {
-        auto element = text(s.label);
-        if (s.focused) {
-        element |= bold;
-        }
-        return element | size(HEIGHT, LESS_THAN, 10);
-    };
-    return option;
-}
-
-auto FluffyApplication::runConsoleApp() -> void {
-    system("clear");
-
-    std::vector<std::string> localGames = {};
-    for (auto &game : games) {
-        localGames.emplace_back(game.getName());
-    }
-    localGames.emplace_back("Exit");
-
-    auto gamesContainer{Container::Vertical({})};
-    for (auto &game : games) {
-        gamesContainer->Add(Button(
-            game.getName(), [&] { runGame(game.getName()); }, style()));
-    }
-
-    auto menu_screen = ScreenInteractive::TerminalOutput();
-
-    auto quitButton = Button("Exit", menu_screen.ExitLoopClosure(), style());
-    gamesContainer->Add(quitButton);
-
-    int menuOptionSelected{0};
-    auto appContainer =
-        Container::Tab({gamesContainer}, &menuOptionSelected);
-
-    auto container = Container::Horizontal({
-        appContainer,
-    });
-    auto renderer = Renderer(container, [&] {
-        return vbox({
-                center(text("Fluffy " + version)),
-                appContainer->Render(),
-            }) |
-            border | size(WIDTH, LESS_THAN, 120);
-    });
-    menu_screen.Loop(renderer);
-
-}
 
 auto FluffyApplication::handleFlags(std::vector<std::string> flags) -> void {
     for (const auto& flag : flags) {
@@ -176,6 +127,6 @@ FluffyApplication::FluffyApplication(int argc, char const *argv[]) {
       if (command != "") handleCommand(command, arguments, database);
     }
     else {
-      runConsoleApp();
+        handleCommand("--help", {}, database);
     }    
 }
