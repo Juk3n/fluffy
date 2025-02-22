@@ -1,14 +1,5 @@
 #pragma once
 
-
-#include <ftxui/component/component.hpp>
-#include <ftxui/component/component_base.hpp>
-#include <ftxui/component/component_options.hpp>
-#include <ftxui/component/screen_interactive.hpp>
-#include <ftxui/dom/elements.hpp>
-#include <ftxui/screen/screen.hpp>
-#include <ftxui/screen/string.hpp>
-
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
@@ -23,8 +14,6 @@
 #include <game.hpp>
 #include <database.hpp>
 #include <output.hpp>
-
-using namespace ftxui;
 
 class FluffyApplication {
 public:
@@ -42,10 +31,6 @@ private:
     auto runGame(std::string gameName) -> void;
 
     auto handleCommand(const std::string& command, const std::vector<std::string>& arguments, Database& database) -> void;
-
-    auto style() -> ButtonOption;
-
-    auto runConsoleApp() -> void;
 
     auto handleFlags(std::vector<std::string> flags) -> void;
 
