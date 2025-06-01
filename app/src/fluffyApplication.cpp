@@ -13,7 +13,12 @@ auto FluffyApplication::handleCommand(
 ) -> void {
     if (command == "show") {
         for (auto &game : gameRepository->getGames()) {
-        std::cout << game.getName() << ": " << game.getPath() << std::endl;
+            std::cout << game.getName() << ": " << game.getPath() << std::endl;
+        }
+    }
+    else if (command == "only-games") {
+        for (auto &game : gameRepository->getGames()) {
+            std::cout << game.getName() << std::endl;
         }
     }
     else if (command == "rm") {

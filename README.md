@@ -31,5 +31,16 @@ user:~/some/path$ fluffy rm game_name
 ## Installation
 
 - Move fluffy to the target folder (after the first run it will create an sql file)
+- (optional) Add fluffy to PATH in .bashrc file
+```console
+export PATH=$PATH:/path/to/target/folder/fluffy
+```
 - Downloaded file is ready to use
 
+### Auto-completion (optional)
+
+- Move fluffy-completion.bash script to target folder
+- Add below line to .bashrc file
+```console
+source /path/to/target/folder/fluffy-completion.bash
+```
