@@ -25,6 +25,16 @@ private:
     std::unique_ptr<GameRepositoryInterface> gameRepository = nullptr;
     std::shared_ptr<Output> output{};
     std::string version{ "v0.1.3" };
+    std::string helpMessage{
+        "usage: fluffy [--flag | <command> <args>]\n\
+fluffy flags:\n\
+    --help\n\
+    --version\n\
+fluffy commands:\n\
+    play <game_name>              Runs a game\n\
+    add <game_name> <game_path>   Add a game library\n\
+    show                          Show all games added to library\n\
+    rm <game_name>                Remove game from a library"};
     
     auto addGame(Database& database, std::string name, std::string path) -> void;
 

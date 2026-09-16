@@ -49,11 +49,7 @@ auto FluffyApplication::handleCommand(
         output->printMessage("fluffy " + version);
     }
     else if (command == "--help") {
-        output->printMessage("fluffy commands:\n \
-    play <game_name>              Runs a game\n \
-    add <game_name> <game_path>   Add a game library\n \
-    show                          Show all games added to library\n \
-    rm <game_name>                Remove game from a library");
+        output->printMessage(this->helpMessage);
     }
     else {
         output->printMessage("fluffy: '" + command + "' is not a fluffy command. See 'fluffy --help'");
