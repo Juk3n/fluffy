@@ -5,7 +5,7 @@ _fluffy_complete() {
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     if [[ "$prev" == "fluffy" ]]; then
-        local comms="play show add"
+        local comms="play show add rm"
         COMPREPLY=( $(compgen -W "${comms}" -- "${cur}") )
     fi
 
