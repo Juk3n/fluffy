@@ -4,7 +4,12 @@
 
 auto FluffyApplication::runGame(std::string gameName) -> void {
     std::string pathToRun = gameRepository->getGameByName(gameName).getPath();
-    system(pathToRun.c_str());
+    if(pathToRun.empty()) {
+        std::cout << "no application found" << std::endl;
+    }
+    else {
+        system(pathToRun.c_str());
+    }
 }
 
 auto FluffyApplication::handleCommand(
