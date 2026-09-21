@@ -57,14 +57,20 @@ auto FluffyApplication::addGame(std::string name, std::string path) -> void {
         std::filesystem::absolute(localPath).lexically_normal().string();
     std::string temp{};
     for (const auto a : globalPath) {
-    if (a != ' ') {
-        temp += a;
-    } else {
-        temp += "\' \'";
+        if (a != ' ') {
+            temp += a;
+        } else {
+            temp += "\' \'";
+        }
     }
+    Game currentGame = gameRepository->getGameByName(gameName);
+    if (currentGame.getName().length() != 0) {
+        output->printMessage("Game already exist");
+    }
+    else {
+        gameRepository->addGame(gameName, temp);
     }
 
-    gameRepository->addGame(gameName, temp);
 }
 
 auto FluffyApplication::handleFlags(std::vector<std::string> flags) -> void {
