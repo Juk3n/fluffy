@@ -31,20 +31,9 @@ auto FluffyApplication::handleCommand(
         gameRepository->deleteGame(gameName);
     }
     else if (command == "add") {
-        std::string gameName{arguments[0]};
-        auto localPath = std::filesystem::path(arguments[1]);
-        std::string globalPath =
-            std::filesystem::absolute(localPath).lexically_normal().string();
-        std::string temp{};
-        for (const auto a : globalPath) {
-        if (a != ' ') {
-            temp += a;
-        } else {
-            temp += "\' \'";
-        }
-        }
-
-        gameRepository->addGame(gameName, temp);
+        std::string gameName = arguments[0];
+        std::string gamePath = arguments[1];
+        this->addGame(gameName, gamePath);
     }
     else if (command == "play") {
         std::string gameName{arguments[0]};
@@ -61,6 +50,28 @@ auto FluffyApplication::handleCommand(
     }
 }
 
+auto FluffyApplication::addGame(std::string name, std::string path) -> void {
+    std::string gameName{name};
+    auto localPath = std::filesystem::path(path);
+    std::string globalPath =
+        std::filesystem::absolute(localPath).lexically_normal().string();
+    std::string temp{};
+    for (const auto a : globalPath) {
+        if (a != ' ') {
+            temp += a;
+        } else {
+            temp += "\' \'";
+        }
+    }
+    Game currentGame = gameRepository->getGameByName(gameName);
+    if (currentGame.getName().length() != 0) {
+        output->printMessage("Game already exist");
+    }
+    else {
+        gameRepository->addGame(gameName, temp);
+    }
+
+}
 
 auto FluffyApplication::handleFlags(std::vector<std::string> flags) -> void {
     for (const auto& flag : flags) {
