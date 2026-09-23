@@ -26,8 +26,8 @@ auto FluffyApplication::handleCommand(
         }
     }
     else if (command == "rm") {
-        std::string gameName{arguments[0]};
-        gameRepository->deleteGame(gameName);
+        RemoveCommand removeCommand = RemoveCommand(gameRepository, arguments[0]);
+        removeCommand.execute();
     }
     else if (command == "add") {
         std::string gameName = arguments[0];

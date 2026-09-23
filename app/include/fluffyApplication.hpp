@@ -17,6 +17,8 @@
 #include <output.hpp>
 #include <gameRepository.hpp>
 #include <command.hpp>
+#include <commands/showCommand.hpp>
+#include <commands/removeCommand.hpp>
 
 class FluffyApplication {
 public:
