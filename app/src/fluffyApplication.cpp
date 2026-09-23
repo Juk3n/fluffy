@@ -17,9 +17,8 @@ auto FluffyApplication::handleCommand(
     const std::vector<std::string>& arguments
 ) -> void {
     if (command == "show") {
-        for (auto &game : gameRepository->getGames()) {
-            std::cout << game.getName() << ": " << game.getPath() << std::endl;
-        }
+        ShowCommand showCommand = ShowCommand(gameRepository);
+        showCommand.execute();
     }
     else if (command == "only-games") {
         for (auto &game : gameRepository->getGames()) {
@@ -120,7 +119,7 @@ FluffyApplication::FluffyApplication(int argc, char const *argv[]) {
 
     auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db") };
     
-    gameRepository = std::make_unique<GameRepository>(
+    gameRepository = std::make_shared<GameRepository>(
         std::make_unique<Database>(databasePath, output)
     );
 
