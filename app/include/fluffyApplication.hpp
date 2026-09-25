@@ -16,15 +16,20 @@
 #include <database.hpp>
 #include <output.hpp>
 #include <gameRepository.hpp>
+#include <command.hpp>
+#include <commands/showCommand.hpp>
+#include <commands/removeCommand.hpp>
+#include <commands/playCommand.hpp>
+#include <commands/addCommand.hpp>
 
 class FluffyApplication {
 public:
     FluffyApplication(int argc, char const *argv[]);
     
 private:
-    std::unique_ptr<GameRepositoryInterface> gameRepository = nullptr;
+    std::shared_ptr<GameRepositoryInterface> gameRepository = nullptr;
     std::shared_ptr<Output> output{};
-    std::string version{ "v0.1.3" };
+    std::string version{ "v0.1.4" };
     std::string helpMessage{
         "usage: fluffy [--flag | <command> <args>]\n\
 fluffy flags:\n\
@@ -36,8 +41,6 @@ fluffy commands:\n\
     show                          Show all games added to library\n\
     rm <game_name>                Remove game from a library"};
     
-    auto addGame(std::string name, std::string path) -> void;
-
     auto removeGame(Database& database, std::string name) -> void;
 
     auto runGame(std::string gameName) -> void;

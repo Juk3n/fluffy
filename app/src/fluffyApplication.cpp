@@ -17,27 +17,24 @@ auto FluffyApplication::handleCommand(
     const std::vector<std::string>& arguments
 ) -> void {
     if (command == "show") {
-        for (auto &game : gameRepository->getGames()) {
-            std::cout << game.getName() << ": " << game.getPath() << std::endl;
-        }
-    }
-    else if (command == "only-games") {
-        for (auto &game : gameRepository->getGames()) {
-            std::cout << game.getName() << std::endl;
-        }
+        ShowCommand showCommand = ShowCommand(gameRepository);
+        showCommand.execute();
     }
     else if (command == "rm") {
-        std::string gameName{arguments[0]};
-        gameRepository->deleteGame(gameName);
+        std::string gameName = arguments[0];
+        RemoveCommand removeCommand = RemoveCommand(gameRepository, gameName);
+        removeCommand.execute();
     }
     else if (command == "add") {
         std::string gameName = arguments[0];
         std::string gamePath = arguments[1];
-        this->addGame(gameName, gamePath);
+        AddCommand addCommand = AddCommand(gameRepository, gameName, gamePath);
+        addCommand.execute();
     }
     else if (command == "play") {
         std::string gameName{arguments[0]};
-        runGame(gameName);
+        PlayCommand playCommand = PlayCommand(gameRepository, gameName);
+        playCommand.execute();
     }
     else if (command == "--version") {
         output->printMessage("fluffy " + version);
@@ -48,29 +45,6 @@ auto FluffyApplication::handleCommand(
     else {
         output->printMessage("fluffy: '" + command + "' is not a fluffy command. See 'fluffy --help'");
     }
-}
-
-auto FluffyApplication::addGame(std::string name, std::string path) -> void {
-    std::string gameName{name};
-    auto localPath = std::filesystem::path(path);
-    std::string globalPath =
-        std::filesystem::absolute(localPath).lexically_normal().string();
-    std::string temp{};
-    for (const auto a : globalPath) {
-        if (a != ' ') {
-            temp += a;
-        } else {
-            temp += "\' \'";
-        }
-    }
-    Game currentGame = gameRepository->getGameByName(gameName);
-    if (currentGame.getName().length() != 0) {
-        output->printMessage("Game already exist");
-    }
-    else {
-        gameRepository->addGame(gameName, temp);
-    }
-
 }
 
 auto FluffyApplication::handleFlags(std::vector<std::string> flags) -> void {
@@ -120,7 +94,7 @@ FluffyApplication::FluffyApplication(int argc, char const *argv[]) {
 
     auto databasePath{ std::filesystem::path(getExecutablePath().parent_path().string() + "/data.db") };
     
-    gameRepository = std::make_unique<GameRepository>(
+    gameRepository = std::make_shared<GameRepository>(
         std::make_unique<Database>(databasePath, output)
     );
 
