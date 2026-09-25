@@ -20,6 +20,7 @@
 #include <commands/showCommand.hpp>
 #include <commands/removeCommand.hpp>
 #include <commands/playCommand.hpp>
+#include <commands/addCommand.hpp>
 
 class FluffyApplication {
 public:
@@ -28,7 +29,7 @@ public:
 private:
     std::shared_ptr<GameRepositoryInterface> gameRepository = nullptr;
     std::shared_ptr<Output> output{};
-    std::string version{ "v0.1.3" };
+    std::string version{ "v0.1.4" };
     std::string helpMessage{
         "usage: fluffy [--flag | <command> <args>]\n\
 fluffy flags:\n\

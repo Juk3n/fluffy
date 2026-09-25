@@ -21,14 +21,15 @@ auto FluffyApplication::handleCommand(
         showCommand.execute();
     }
     else if (command == "rm") {
-        RemoveCommand removeCommand = RemoveCommand(gameRepository, arguments[0]);
+        std::string gameName = arguments[0];
+        RemoveCommand removeCommand = RemoveCommand(gameRepository, gameName);
         removeCommand.execute();
     }
     else if (command == "add") {
         std::string gameName = arguments[0];
         std::string gamePath = arguments[1];
-        
-        this->addGame(gameName, gamePath);
+        AddCommand addCommand = AddCommand(gameRepository, gameName, gamePath);
+        addCommand.execute();
     }
     else if (command == "play") {
         std::string gameName{arguments[0]};
