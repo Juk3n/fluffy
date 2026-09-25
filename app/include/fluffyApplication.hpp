@@ -41,8 +41,6 @@ fluffy commands:\n\
     show                          Show all games added to library\n\
     rm <game_name>                Remove game from a library"};
     
-    auto addGame(std::string name, std::string path) -> void;
-
     auto removeGame(Database& database, std::string name) -> void;
 
     auto runGame(std::string gameName) -> void;
