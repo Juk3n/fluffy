@@ -5,19 +5,23 @@
 
 #include <command.hpp>
 #include <gameRepository.hpp>
+#include <output.hpp>
 
 class AddCommand: public Command {
     private:
         std::weak_ptr<GameRepositoryInterface> gameRepository;
+        std::weak_ptr<Output> output;
         std::string gameName;
         std::string path;
     public:
         AddCommand(
             std::weak_ptr<GameRepositoryInterface> gameRepository,
+            std::weak_ptr<Output> output,
             std::string gameName,
             std::string path
         ) {
             this->gameRepository = gameRepository;
+            this->output = output;
             this->gameName = gameName;
             this->path = path;
         }
@@ -37,8 +41,9 @@ class AddCommand: public Command {
             if (std::shared_ptr<GameRepositoryInterface> gr = gameRepository.lock()) {
                 Game currentGame = gr->getGameByName(gameName);
                 if (currentGame.getName().length() != 0) {
-                    std::cout << "Game already exist" << std::endl;
-                    // output->printMessage("Game already exist");
+                    if (auto out = output.lock()) {
+                        out->printMessage("Game already exist");
+                    }
                 }
                 else {
                     gr->addGame(gameName, temp);
