@@ -17,7 +17,7 @@ auto FluffyApplication::handleCommand(
     const std::vector<std::string>& arguments
 ) -> void {
     if (command == "show") {
-        ShowCommand showCommand = ShowCommand(gameRepository);
+        ShowCommand showCommand = ShowCommand(gameRepository, output);
         showCommand.execute();
     }
     else if (command == "rm") {
@@ -33,12 +33,12 @@ auto FluffyApplication::handleCommand(
     }
     else if (command == "play") {
         std::string gameName{arguments[0]};
-        PlayCommand playCommand = PlayCommand(gameRepository, gameName);
+        PlayCommand playCommand = PlayCommand(gameRepository, output, gameName);
         playCommand.execute();
     }
     else if (command == "only-games") {
         for (auto &game : gameRepository->getGames()) {
-            std::cout << game.getName() << std::endl;
+            output->printMessage(game.getName());
         }
     }
     else if (command == "--version") {
