@@ -13,6 +13,12 @@ void GameRepository::addGame(const std::string &name, const std::string &path)
     this->database->executeSqlCommand(command);
 }
 
+void GameRepository::editGame(const std::string &name, const std::string &path)
+{
+    std::string command = "";
+    this->database->executeSqlCommand(command);
+}
+
 Game GameRepository::getGameByName(const std::string &name)
 {
     auto games = this->database->getGames();

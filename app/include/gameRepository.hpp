@@ -15,6 +15,8 @@ public:
     
     void addGame(const std::string &name, const std::string &path);
     
+    void editGame(const std::string &name, const std::string &path);
+
     Game getGameByName(const std::string& name);
     
     std::vector<Game> getGames();
